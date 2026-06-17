@@ -274,6 +274,9 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+class AgentStoppedException(Exception):
+    pass
+
 # Global State
 state = {
     "agent_running": False,
@@ -321,6 +324,10 @@ async def add_log(message: str):
 async def on_agent_step(state_summary, agent_output, step_number):
     global pause_event
     
+    # Check if stop requested
+    if not state["agent_running"]:
+        raise AgentStoppedException("Agent execution stopped by user.")
+        
     # Get thought and action details
     thoughts = getattr(agent_output, "model_thoughts", "Executing next action...")
     await add_log(f"Agent Thought (Step {step_number}): {thoughts}")
@@ -333,6 +340,11 @@ async def on_agent_step(state_summary, agent_output, step_number):
         await add_log("Agent execution PAUSED by user. Waiting for resume...")
         await manager.broadcast({"type": "status", "status": "paused"})
         await pause_event.wait()
+        
+        # Check again after unblocking from pause
+        if not state["agent_running"]:
+            raise AgentStoppedException("Agent execution stopped by user.")
+            
         await add_log("Agent execution RESUMED by user.")
         await manager.broadcast({"type": "status", "status": "running"})
 
@@ -505,6 +517,7 @@ async def run_linkedin_fast(keywords, location):
     state["agent_paused"] = False
     pause_event.set()
     
+    await manager.broadcast({"type": "status", "status": "running"})
     await add_log("[SYSTEM] Starting Fast Playwright Scraper...")
     asyncio.create_task(screenshot_loop())
     
@@ -711,6 +724,7 @@ async def run_linkedin_agent(keywords, location, llm_provider, api_key):
     state["agent_paused"] = False
     pause_event.set()
     
+    await manager.broadcast({"type": "status", "status": "running"})
     await add_log(f"Starting browser-use agent for '{keywords}' in '{location}'...")
     
     # Initialize LLM
@@ -768,6 +782,8 @@ async def run_linkedin_agent(keywords, location, llm_provider, api_key):
         await active_agent.run()
         await add_log("Agent execution finished successfully!")
         
+    except AgentStoppedException:
+        await add_log("[SYSTEM] Scraper stopped successfully by user.")
     except Exception as e:
         await add_log(f"Error during agent execution: {str(e)}")
     finally:
@@ -861,16 +877,10 @@ async def websocket_endpoint(websocket: WebSocket):
                     
             elif msg_type == "stop":
                 if state["agent_running"]:
-                    await add_log("[SYSTEM] Stopping agent execution...")
+                    await add_log("[SYSTEM] Stop requested. Finishing current job details before exit...")
                     state["agent_running"] = False
                     # Unblock if paused
                     pause_event.set()
-                    # Trigger agent cancellation if supported, or browser close will stop it
-                    if active_browser:
-                        try:
-                            await active_browser.close()
-                        except Exception:
-                            pass
                             
             elif msg_type == "input":
                 text = msg.get("text", "")
