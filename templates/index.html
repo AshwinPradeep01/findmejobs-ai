@@ -1439,6 +1439,15 @@
             }
             
             if (socket && socket.readyState === WebSocket.OPEN) {
+                // Instantly update UI to show starting feedback
+                startBtn.disabled = true;
+                keywordsInput.disabled = true;
+                locationInput.disabled = true;
+                llmProviderInput.disabled = true;
+                apiKeyInput.disabled = true;
+                statusBadge.className = 'status-badge status-running';
+                statusText.textContent = 'STARTING...';
+                
                 socket.send(JSON.stringify({
                     type: "start",
                     mode: mode,
@@ -1453,18 +1462,24 @@
 
         pauseBtn.addEventListener('click', () => {
             if (socket && socket.readyState === WebSocket.OPEN) {
+                pauseBtn.disabled = true;
+                statusText.textContent = 'PAUSING...';
                 socket.send(JSON.stringify({ type: "pause" }));
             }
         });
 
         resumeBtn.addEventListener('click', () => {
             if (socket && socket.readyState === WebSocket.OPEN) {
+                resumeBtn.disabled = true;
+                statusText.textContent = 'RESUMING...';
                 socket.send(JSON.stringify({ type: "resume" }));
             }
         });
 
         stopBtn.addEventListener('click', () => {
             if (socket && socket.readyState === WebSocket.OPEN) {
+                stopBtn.disabled = true;
+                statusText.textContent = 'STOPPING...';
                 socket.send(JSON.stringify({ type: "stop" }));
             }
         });
