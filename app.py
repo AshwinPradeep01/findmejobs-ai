@@ -55,7 +55,32 @@ def init_db():
         pass
     conn.close()
 
+def get_existing_job_ids():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT job_id FROM jobs")
+    rows = cursor.fetchall()
+    conn.close()
+    return [row[0] for row in rows]
+
+def sync_csv_from_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM jobs ORDER BY scraped_at ASC")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    fieldnames = ["job_id", "title", "company", "location", "url", "date_posted", "salary", "employment_type", "work_mode", "description", "scraped_at"]
+    with open(CSV_PATH, mode="w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(dict(row))
+    logger.info(f"Synchronized {len(rows)} jobs from SQLite to CSV.")
+
 init_db()
+sync_csv_from_db()
 
 # DB Helpers
 def save_job_data(job):
@@ -122,6 +147,12 @@ async def save_job_to_db(
 ):
     """Saves the extracted job details (Title, Company, Location, Description, Salary, Work Mode, etc.) to the SQLite database and CSV."""
     global active_browser
+    
+    job_id = extract_job_id(url)
+    existing_ids = get_existing_job_ids()
+    if job_id in existing_ids:
+        logger.info(f"Skipping save for already scraped job ID: {job_id}")
+        return f"Job with ID '{job_id}' is already saved in the database. Skipped."
     
     # Fallback parsing directly from Playwright DOM if values are missing or default
     if active_browser:
@@ -597,6 +628,8 @@ async def run_linkedin_fast(keywords, location):
             
             pages_to_scrape = 5
             jobs_scraped = 0
+            existing_job_ids = set(get_existing_job_ids())
+            skipped_count = 0
             
             for current_page in range(1, pages_to_scrape + 1):
                 await check_hitl_pause()
@@ -655,6 +688,11 @@ async def run_linkedin_fast(keywords, location):
                     if should_stop():
                         break
                     
+                    if job_id in existing_job_ids:
+                        await add_log(f"   [SYSTEM] Skipping Job ID: {job_id} (Already scraped)")
+                        skipped_count += 1
+                        continue
+                    
                     await add_log(f"[SYSTEM] [{index+1}/{len(job_ids)}] Clicking job ID: {job_id}")
                     job_card_click = page.locator(f"[data-occludable-job-id='{job_id}'], [data-job-id='{job_id}']").first
                     if await job_card_click.count() > 0:
@@ -705,7 +743,7 @@ async def run_linkedin_fast(keywords, location):
                         await add_log("[SYSTEM] No active 'Next' button found. Stopping scraping.")
                         break
             
-            await add_log(f"[SYSTEM] Fast Scraper finished! Scraped {jobs_scraped} jobs successfully.")
+            await add_log(f"[SYSTEM] Fast Scraper finished! Scraped {jobs_scraped} new jobs, skipped {skipped_count} duplicates.")
             await context.close()
             
     except Exception as e:
@@ -759,6 +797,9 @@ async def run_linkedin_agent(keywords, location, llm_provider, api_key):
             args=["--disable-blink-features=AutomationControlled"]
         )
         
+        existing_ids = get_existing_job_ids()
+        existing_ids_str = ", ".join(existing_ids) if existing_ids else "None"
+        
         task_prompt = (
             f"Navigate to LinkedIn jobs search page. "
             f"Search for '{keywords}' in '{location}'. "
@@ -766,7 +807,9 @@ async def run_linkedin_agent(keywords, location, llm_provider, api_key):
             f"Use the custom action 'Save job details to database and CSV' to extract and save the details of each job "
             f"(Title, Company, Location, Description, URL, Salary, and Employment Type). "
             f"Try to scrape at least 5-10 jobs. Go to the next page of results if necessary. "
-            f"Do not click apply or perform external application steps."
+            f"Do not click apply or perform external application steps.\n\n"
+            f"IMPORTANT: The following job IDs have ALREADY been scraped and saved to the database: [{existing_ids_str}]. "
+            f"Do NOT click on or scrape these job IDs. Skip them and proceed to other jobs."
         )
         
         active_agent = Agent(
