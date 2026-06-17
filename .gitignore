@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Databases and CSVs
+*.db
+*.csv
+
+# Playwright and screenshots
+.playwright_data/
+*.png
+cookie.txt
+
+# Local files
+.env
+.env.*
