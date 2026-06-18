@@ -1557,6 +1557,13 @@
             setSpotlightActive(!isSpotlight);
         });
 
+        // Close/Minimize Spotlight mode on 'Escape' keypress
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isSpotlight) {
+                setSpotlightActive(false);
+            }
+        });
+
         // Toggle LLM settings visibility based on Scraper Mode selection
         const llmDetailsAccordion = document.querySelector('.llm-details-accordion');
         
