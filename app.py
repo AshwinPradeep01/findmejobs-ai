@@ -317,6 +317,8 @@ async def parse_dom_job_details(page):
     # 1. Title
     title = ""
     title_selectors = [
+        ".job-details-jobs-unified-top-card__job-title h1 a",
+        ".job-details-jobs-unified-top-card__job-title h1",
         "h1.t-24",
         "h1",
         "h2.jobs-unified-top-card__job-title",
@@ -336,12 +338,12 @@ async def parse_dom_job_details(page):
     # 2. Company
     company = ""
     company_selectors = [
+        ".job-details-jobs-unified-top-card__company-name a",
+        ".job-details-jobs-unified-top-card__company-name",
         ".jobs-unified-top-card__company-name a[href*='/company/']",
         ".job-details-jobs-unified-top-card__company-name a[href*='/company/']",
         ".jobs-unified-top-card__company-name a",
         ".jobs-unified-top-card__company-name",
-        ".job-details-jobs-unified-top-card__company-name a",
-        ".job-details-jobs-unified-top-card__company-name",
         ".jobs-details-top-card__company-info a",
         "a[href*='/company/']"
     ]
@@ -356,35 +358,82 @@ async def parse_dom_job_details(page):
 
     # 3. Location & Workplace type
     location = ""
-    location_selectors = [
-        ".jobs-unified-top-card__bullet",
-        ".job-details-jobs-unified-top-card__bullet",
-        ".jobs-details-top-card__bullet",
-        "span.jobs-unified-top-card__bullet-point"
+    tertiary_container_selectors = [
+        ".job-details-jobs-unified-top-card__tertiary-description-container",
+        ".jobs-unified-top-card__tertiary-description-container",
+        ".jobs-details-top-card__tertiary-description-container"
     ]
-    for sel in location_selectors:
-        el = page.locator(sel)
-        if await el.count() > 0:
-            val = (await el.first.inner_text()).strip()
-            if val and not any(k in val.lower() for k in ["ago", "posted", "reposted"]):
-                location = val
+    for container_sel in tertiary_container_selectors:
+        container = page.locator(container_sel)
+        if await container.count() > 0:
+            spans = container.locator(".tvm__text")
+            count = await spans.count()
+            for idx in range(count):
+                text = (await spans.nth(idx).inner_text()).strip()
+                if not text or text == "·":
+                    continue
+                text_lower = text.lower()
+                if any(k in text_lower for k in ["ago", "posted", "reposted", "applicant", "actively reviewing", "promoted"]):
+                    continue
+                location = text
                 break
+            if location:
+                break
+
+    if not location:
+        location_selectors = [
+            ".jobs-unified-top-card__bullet",
+            ".job-details-jobs-unified-top-card__bullet",
+            ".jobs-details-top-card__bullet",
+            "span.jobs-unified-top-card__bullet-point"
+        ]
+        for sel in location_selectors:
+            el = page.locator(sel)
+            if await el.count() > 0:
+                val = (await el.first.inner_text()).strip()
+                if val and not any(k in val.lower() for k in ["ago", "posted", "reposted"]):
+                    location = val
+                    break
     if not location:
         location = "Unknown Location"
 
     # 4. Work Mode
     work_mode = "Not Specified"
-    workplace_selectors = [
-        ".jobs-unified-top-card__workplace-type",
-        ".job-details-jobs-unified-top-card__workplace-type",
-        ".jobs-details-top-card__workplace-type"
+    pref_selectors = [
+        ".job-details-fit-level-preferences button",
+        ".job-details-preferences button",
+        ".job-details-jobs-unified-top-card__container--two-pane button"
     ]
-    for sel in workplace_selectors:
-        el = page.locator(sel)
-        if await el.count() > 0:
-            work_mode = (await el.first.inner_text()).strip()
-            if work_mode:
+    for sel in pref_selectors:
+        els = page.locator(sel)
+        count = await els.count()
+        for idx in range(count):
+            text = (await els.nth(idx).inner_text()).strip()
+            text_lower = text.lower()
+            if "remote" in text_lower:
+                work_mode = "Remote"
                 break
+            elif "hybrid" in text_lower:
+                work_mode = "Hybrid"
+                break
+            elif "on-site" in text_lower or "onsite" in text_lower:
+                work_mode = "On-site"
+                break
+        if work_mode != "Not Specified":
+            break
+
+    if work_mode == "Not Specified":
+        workplace_selectors = [
+            ".jobs-unified-top-card__workplace-type",
+            ".job-details-jobs-unified-top-card__workplace-type",
+            ".jobs-details-top-card__workplace-type"
+        ]
+        for sel in workplace_selectors:
+            el = page.locator(sel)
+            if await el.count() > 0:
+                work_mode = (await el.first.inner_text()).strip()
+                if work_mode:
+                    break
                 
     if not work_mode or work_mode in ["Unknown", "Not Specified"]:
         bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet, .jobs-details-top-card__bullet, .jobs-unified-top-card__bullet-point")
@@ -416,17 +465,31 @@ async def parse_dom_job_details(page):
 
     # 5. Date Posted
     date_posted = ""
-    date_selectors = [
-        ".jobs-unified-top-card__posted-date",
-        ".job-details-jobs-unified-top-card__posted-date",
-        ".jobs-details-top-card__posted-date"
-    ]
-    for sel in date_selectors:
-        el = page.locator(sel)
-        if await el.count() > 0:
-            date_posted = (await el.first.inner_text()).strip()
+    for container_sel in tertiary_container_selectors:
+        container = page.locator(container_sel)
+        if await container.count() > 0:
+            spans = container.locator(".tvm__text")
+            count = await spans.count()
+            for idx in range(count):
+                text = (await spans.nth(idx).inner_text()).strip()
+                if any(k in text.lower() for k in ["ago", "posted", "reposted"]):
+                    date_posted = text
+                    break
             if date_posted:
                 break
+
+    if not date_posted:
+        date_selectors = [
+            ".jobs-unified-top-card__posted-date",
+            ".job-details-jobs-unified-top-card__posted-date",
+            ".jobs-details-top-card__posted-date"
+        ]
+        for sel in date_selectors:
+            el = page.locator(sel)
+            if await el.count() > 0:
+                date_posted = (await el.first.inner_text()).strip()
+                if date_posted:
+                    break
                 
     if not date_posted or date_posted in ["Unknown", "Not Specified"]:
         bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet, .jobs-details-top-card__bullet, .jobs-unified-top-card__bullet-point")
@@ -442,13 +505,37 @@ async def parse_dom_job_details(page):
     salary = "Not Specified"
     employment_type = "Not Specified"
     
+    for sel in pref_selectors:
+        els = page.locator(sel)
+        count = await els.count()
+        for idx in range(count):
+            text = (await els.nth(idx).inner_text()).strip()
+            text_lower = text.lower()
+            for k in ["full-time", "part-time", "contractual", "contract", "internship", "intern", "temporary", "co-op"]:
+                if k in text_lower:
+                    if k in ["full-time", "full time"]:
+                        employment_type = "Full-time"
+                    elif k in ["part-time", "part time"]:
+                        employment_type = "Part-time"
+                    elif k in ["contract", "contractual"]:
+                        employment_type = "Contract"
+                    elif k in ["intern", "internship"]:
+                        employment_type = "Internship"
+                    elif k in ["temporary"]:
+                        employment_type = "Temporary"
+                    elif k in ["co-op"]:
+                        employment_type = "Co-op"
+                    break
+            if employment_type != "Not Specified":
+                break
+
     insight_els = page.locator(".jobs-unified-top-card__job-insight, .job-details-jobs-unified-top-card__job-insight, .jobs-unified-top-card__job-insight-view-model-string, .job-details-jobs-unified-top-card__job-insight-view-model-string")
     for i in range(await insight_els.count()):
         text = (await insight_els.nth(i).inner_text()).strip()
         text_lower = text.lower()
         if "$" in text or "yr" in text or "hr" in text:
             salary = text.replace("\n", " ").strip()
-        elif any(k in text_lower for k in ["full-time", "full time", "part-time", "part time", "contract", "contractual", "intern", "internship", "temporary", "co-op"]):
+        elif employment_type == "Not Specified" and any(k in text_lower for k in ["full-time", "full time", "part-time", "part time", "contract", "contractual", "intern", "internship", "temporary", "co-op"]):
             employment_type = text.replace("\n", " ").strip()
 
     if salary == "Not Specified":
