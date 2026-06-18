@@ -159,104 +159,23 @@ async def save_job_to_db(
         try:
             page = await active_browser.get_current_page()
             if page:
-                # 1. Location Fallback
+                dom = await parse_dom_job_details(page)
+                if not title or title in ["Unknown Title", "Not Specified", "Unknown"]:
+                    title = dom["title"]
+                if not company or company in ["Unknown Company", "Not Specified", "Unknown"]:
+                    company = dom["company"]
                 if not location or location in ["Unknown Location", "Not Specified", "Unknown"]:
-                    loc_selectors = [
-                        ".jobs-unified-top-card__bullet",
-                        ".job-details-jobs-unified-top-card__bullet",
-                        ".jobs-details-top-card__bullet",
-                        "span.jobs-unified-top-card__bullet-point",
-                        ".job-card-container__metadata-item"
-                    ]
-                    for sel in loc_selectors:
-                        el = page.locator(sel)
-                        if await el.count() > 0:
-                            val = (await el.first.inner_text()).strip()
-                            if val:
-                                location = val
-                                break
-
-                # 2. Date Posted Fallback
+                    location = dom["location"]
                 if not date_posted or date_posted in ["Unknown", "Not Specified"]:
-                    date_selectors = [
-                        ".jobs-unified-top-card__posted-date",
-                        ".job-details-jobs-unified-top-card__posted-date",
-                        ".jobs-details-top-card__posted-date"
-                    ]
-                    for sel in date_selectors:
-                        el = page.locator(sel)
-                        if await el.count() > 0:
-                            val = (await el.first.inner_text()).strip()
-                            if val:
-                                date_posted = val
-                                break
-
-                # 3. Salary & Employment Type from insights
-                insight_els = page.locator(".jobs-unified-top-card__job-insight, .job-details-jobs-unified-top-card__job-insight")
-                for i in range(await insight_els.count()):
-                    text = (await insight_els.nth(i).inner_text()).strip()
-                    if ("$" in text or "yr" in text or "hr" in text) and (not salary or salary == "Not Specified"):
-                        salary = text.replace("\n", " ").strip()
-                    elif ("Full-time" in text or "Part-time" in text or "Contract" in text or "Temporary" in text) and (not employment_type or employment_type == "Not Specified"):
-                        employment_type = text.replace("\n", " ").strip()
-                            
-                # Fallback check bullets for salary
-                if not salary or salary == "Not Specified":
-                    bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet")
-                    for i in range(await bullet_els.count()):
-                        text = (await bullet_els.nth(i).inner_text()).strip()
-                        if "$" in text:
-                            salary = text
-                            break
-
-                # 4. Work Mode Fallback
-                if not work_mode or work_mode in ["Unknown", "Not Specified"]:
-                    workplace_selectors = [
-                        ".jobs-unified-top-card__workplace-type",
-                        ".job-details-jobs-unified-top-card__workplace-type",
-                        ".jobs-details-top-card__workplace-type"
-                    ]
-                    for sel in workplace_selectors:
-                        el = page.locator(sel)
-                        if await el.count() > 0:
-                            val = (await el.first.inner_text()).strip()
-                            if val:
-                                work_mode = val
-                                break
-                    if not work_mode or work_mode in ["Unknown", "Not Specified"]:
-                        bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet, .jobs-unified-top-card__bullet-point")
-                        for i in range(await bullet_els.count()):
-                            text = (await bullet_els.nth(i).inner_text()).lower()
-                            if "remote" in text:
-                                work_mode = "Remote"
-                                break
-                            elif "hybrid" in text:
-                                work_mode = "Hybrid"
-                                break
-                            elif "on-site" in text or "onsite" in text:
-                                work_mode = "On-site"
-                                break
-
-                # Clean location if it contains work_mode
-                if work_mode != "Not Specified" and location:
-                    location = re.sub(r"\s*\(\s*" + re.escape(work_mode) + r"\s*\)", "", location, flags=re.IGNORECASE)
-                    location = re.sub(r"\s*\(\s*(remote|hybrid|on-site|onsite)\s*\)", "", location, flags=re.IGNORECASE)
-
-                # 5. Description Fallback (if LLM passed short summary)
+                    date_posted = dom["date_posted"]
+                if not salary or salary in ["Not Specified", "Unknown"]:
+                    salary = dom["salary"]
+                if not employment_type or employment_type in ["Not Specified", "Unknown"]:
+                    employment_type = dom["employment_type"]
+                if not work_mode or work_mode in ["Not Specified", "Unknown"]:
+                    work_mode = dom["work_mode"]
                 if not description or len(description) < 50:
-                    desc_selectors = [
-                        ".jobs-description__content",
-                        ".jobs-description",
-                        "#job-details",
-                        ".jobs-box__html-content"
-                    ]
-                    for sel in desc_selectors:
-                        el = page.locator(sel)
-                        if await el.count() > 0:
-                            val = (await el.first.inner_text()).strip()
-                            if val:
-                                description = val
-                                break
+                    description = dom["description"]
         except Exception as e:
             logger.error(f"Error during DOM fallback parsing in custom action: {e}")
 
@@ -394,15 +313,15 @@ async def check_login_async(page):
         await add_log(f"[SYSTEM] Error checking auth status: {str(e)}")
         return False
 
-async def scrape_job_details_async(page, job_id):
-    await asyncio.sleep(2)
-    
+async def parse_dom_job_details(page):
+    # 1. Title
     title = ""
     title_selectors = [
+        "h1.t-24",
+        "h1",
         "h2.jobs-unified-top-card__job-title",
         ".jobs-unified-top-card__job-title",
         ".job-details-jobs-unified-top-card__title",
-        "h1.t-24",
         "h2"
     ]
     for sel in title_selectors:
@@ -411,14 +330,20 @@ async def scrape_job_details_async(page, job_id):
             title = (await el.first.inner_text()).strip()
             if title:
                 break
+    if not title:
+        title = "Unknown Title"
 
+    # 2. Company
     company = ""
     company_selectors = [
+        ".jobs-unified-top-card__company-name a[href*='/company/']",
+        ".job-details-jobs-unified-top-card__company-name a[href*='/company/']",
         ".jobs-unified-top-card__company-name a",
         ".jobs-unified-top-card__company-name",
         ".job-details-jobs-unified-top-card__company-name a",
         ".job-details-jobs-unified-top-card__company-name",
-        ".jobs-details-top-card__company-info a"
+        ".jobs-details-top-card__company-info a",
+        "a[href*='/company/']"
     ]
     for sel in company_selectors:
         el = page.locator(sel)
@@ -426,20 +351,70 @@ async def scrape_job_details_async(page, job_id):
             company = (await el.first.inner_text()).strip()
             if company:
                 break
+    if not company:
+        company = "Unknown Company"
 
+    # 3. Location & Workplace type
     location = ""
     location_selectors = [
         ".jobs-unified-top-card__bullet",
         ".job-details-jobs-unified-top-card__bullet",
-        ".jobs-details-top-card__bullet"
+        ".jobs-details-top-card__bullet",
+        "span.jobs-unified-top-card__bullet-point"
     ]
     for sel in location_selectors:
         el = page.locator(sel)
         if await el.count() > 0:
-            location = (await el.first.inner_text()).strip()
-            if location:
+            val = (await el.first.inner_text()).strip()
+            if val and not any(k in val.lower() for k in ["ago", "posted", "reposted"]):
+                location = val
+                break
+    if not location:
+        location = "Unknown Location"
+
+    # 4. Work Mode
+    work_mode = "Not Specified"
+    workplace_selectors = [
+        ".jobs-unified-top-card__workplace-type",
+        ".job-details-jobs-unified-top-card__workplace-type",
+        ".jobs-details-top-card__workplace-type"
+    ]
+    for sel in workplace_selectors:
+        el = page.locator(sel)
+        if await el.count() > 0:
+            work_mode = (await el.first.inner_text()).strip()
+            if work_mode:
+                break
+                
+    if not work_mode or work_mode in ["Unknown", "Not Specified"]:
+        bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet, .jobs-details-top-card__bullet, .jobs-unified-top-card__bullet-point")
+        for i in range(await bullet_els.count()):
+            text = (await bullet_els.nth(i).inner_text()).lower()
+            if "remote" in text:
+                work_mode = "Remote"
+                break
+            elif "hybrid" in text:
+                work_mode = "Hybrid"
+                break
+            elif "on-site" in text or "onsite" in text:
+                work_mode = "On-site"
                 break
 
+    if not work_mode or work_mode in ["Unknown", "Not Specified"]:
+        loc_lower = location.lower()
+        if "remote" in loc_lower:
+            work_mode = "Remote"
+        elif "hybrid" in loc_lower:
+            work_mode = "Hybrid"
+        elif "on-site" in loc_lower or "onsite" in loc_lower:
+            work_mode = "On-site"
+
+    if work_mode != "Not Specified" and location:
+        location = re.sub(r"\s*\(\s*" + re.escape(work_mode) + r"\s*\)", "", location, flags=re.IGNORECASE)
+        location = re.sub(r"\s*\(\s*(remote|hybrid|on-site|onsite)\s*\)", "", location, flags=re.IGNORECASE)
+        location = location.strip().rstrip(",").strip().rstrip("(").rstrip(")").strip()
+
+    # 5. Date Posted
     date_posted = ""
     date_selectors = [
         ".jobs-unified-top-card__posted-date",
@@ -452,7 +427,39 @@ async def scrape_job_details_async(page, job_id):
             date_posted = (await el.first.inner_text()).strip()
             if date_posted:
                 break
+                
+    if not date_posted or date_posted in ["Unknown", "Not Specified"]:
+        bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet, .jobs-details-top-card__bullet, .jobs-unified-top-card__bullet-point")
+        for i in range(await bullet_els.count()):
+            text = (await bullet_els.nth(i).inner_text()).strip()
+            if "ago" in text.lower() or "posted" in text.lower() or "reposted" in text.lower():
+                date_posted = text
+                break
+    if not date_posted:
+        date_posted = "Unknown"
 
+    # 6. Salary and Employment Type
+    salary = "Not Specified"
+    employment_type = "Not Specified"
+    
+    insight_els = page.locator(".jobs-unified-top-card__job-insight, .job-details-jobs-unified-top-card__job-insight, .jobs-unified-top-card__job-insight-view-model-string, .job-details-jobs-unified-top-card__job-insight-view-model-string")
+    for i in range(await insight_els.count()):
+        text = (await insight_els.nth(i).inner_text()).strip()
+        text_lower = text.lower()
+        if "$" in text or "yr" in text or "hr" in text:
+            salary = text.replace("\n", " ").strip()
+        elif any(k in text_lower for k in ["full-time", "full time", "part-time", "part time", "contract", "contractual", "intern", "internship", "temporary", "co-op"]):
+            employment_type = text.replace("\n", " ").strip()
+
+    if salary == "Not Specified":
+        bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet, .jobs-details-top-card__bullet")
+        for i in range(await bullet_els.count()):
+            text = (await bullet_els.nth(i).inner_text()).strip()
+            if "$" in text:
+                salary = text
+                break
+
+    # 7. Description
     description = ""
     description_selectors = [
         ".jobs-description__content",
@@ -466,79 +473,27 @@ async def scrape_job_details_async(page, job_id):
             description = (await el.first.inner_text()).strip()
             if description:
                 break
+    if not description:
+        description = "No description available"
 
-    salary = ""
-    employment_type = ""
-    try:
-        insight_els = page.locator(".jobs-unified-top-card__job-insight, .job-details-jobs-unified-top-card__job-insight")
-        for i in range(await insight_els.count()):
-            text = (await insight_els.nth(i).inner_text()).strip()
-            if "$" in text or "yr" in text or "hr" in text:
-                salary = text.replace("\n", " ").strip()
-            elif "Full-time" in text or "Part-time" in text or "Contract" in text or "Temporary" in text:
-                employment_type = text.replace("\n", " ").strip()
-    except Exception:
-        pass
-
-    if not salary:
-        try:
-            bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet")
-            for i in range(await bullet_els.count()):
-                text = (await bullet_els.nth(i).inner_text()).strip()
-                if "$" in text:
-                    salary = text
-                    break
-        except Exception:
-            pass
-
-    work_mode = "Not Specified"
-    try:
-        workplace_selectors = [
-            ".jobs-unified-top-card__workplace-type",
-            ".job-details-jobs-unified-top-card__workplace-type",
-            ".jobs-details-top-card__workplace-type"
-        ]
-        for sel in workplace_selectors:
-            el = page.locator(sel)
-            if await el.count() > 0:
-                work_mode = (await el.first.inner_text()).strip()
-                if work_mode:
-                    break
-        
-        if not work_mode or work_mode in ["Unknown", "Not Specified"]:
-            bullet_els = page.locator(".jobs-unified-top-card__bullet, .job-details-jobs-unified-top-card__bullet, .jobs-unified-top-card__bullet-point")
-            for i in range(await bullet_els.count()):
-                text = (await bullet_els.nth(i).inner_text()).lower()
-                if "remote" in text:
-                    work_mode = "Remote"
-                    break
-                elif "hybrid" in text:
-                    work_mode = "Hybrid"
-                    break
-                elif "on-site" in text or "onsite" in text:
-                    work_mode = "On-site"
-                    break
-    except Exception:
-        pass
-
-    if work_mode != "Not Specified" and location:
-        location = re.sub(r"\s*\(\s*" + re.escape(work_mode) + r"\s*\)", "", location, flags=re.IGNORECASE)
-        location = re.sub(r"\s*\(\s*(remote|hybrid|on-site|onsite)\s*\)", "", location, flags=re.IGNORECASE)
-
-    job = {
-        "job_id": job_id,
-        "title": title or "Unknown Title",
-        "company": company or "Unknown Company",
-        "location": location or "Unknown Location",
-        "url": f"https://www.linkedin.com/jobs/view/{job_id}/",
-        "date_posted": date_posted or "Unknown",
-        "salary": salary or "Not Specified",
-        "employment_type": employment_type or "Not Specified",
+    return {
+        "title": title,
+        "company": company,
+        "location": location,
         "work_mode": work_mode,
-        "description": description or "No description available",
-        "scraped_at": datetime.datetime.now().isoformat()
+        "date_posted": date_posted,
+        "salary": salary,
+        "employment_type": employment_type,
+        "description": description
     }
-    return job
+
+async def scrape_job_details_async(page, job_id):
+    await asyncio.sleep(2)
+    details = await parse_dom_job_details(page)
+    details["job_id"] = job_id
+    details["url"] = f"https://www.linkedin.com/jobs/view/{job_id}/"
+    details["scraped_at"] = datetime.datetime.now().isoformat()
+    return details
 
 # Main Fast Playwright Runner
 async def run_linkedin_fast(keywords, location):
