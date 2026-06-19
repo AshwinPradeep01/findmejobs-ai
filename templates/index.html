@@ -157,26 +157,132 @@
 
         /* Main Workspace Panels */
         .workspace {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
             overflow: hidden;
             flex: 1;
             min-height: 0;
+            margin-left: 55px; /* Leave space for vertical tabs */
+            width: calc(100% - 55px);
+            position: relative;
         }
 
-        .left-column {
+        /* Collapsible Sidebar Layout */
+        .collapsible-sidebar {
+            position: fixed;
+            top: 95px; /* Below header */
+            left: 0;
+            bottom: 20px;
+            width: 480px; /* 435px content + 45px tab bar */
+            z-index: 1000;
+            transform: translateX(-435px); /* Hide content, show 45px tab bar */
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(10, 12, 22, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            border-top-right-radius: 16px;
+            border-bottom-right-radius: 16px;
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+        
+        .collapsible-sidebar:hover {
+            transform: translateX(0);
+        }
+        
+        .sidebar-content {
+            width: 435px;
+            height: 100%;
+            overflow-y: auto;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+        }
+        
+        .sidebar-tabs-bar {
+            width: 45px;
+            background: rgba(20, 24, 40, 0.9);
+            border-left: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 25px;
+            padding-top: 20px;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 0;
+            transition: all 0.2s ease;
+            position: relative;
+            outline: none;
+        }
+        
+        .sidebar-tab-btn:hover {
+            color: #ffffff;
+        }
+        
+        .sidebar-tab-btn.active {
+            color: var(--primary);
+        }
+        
+        .sidebar-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 10%;
+            height: 80%;
+            width: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+        
+        .sidebar-tab-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+        
+        .tab-vertical-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            margin-top: 5px;
+        }
+        
+        .sidebar-tab-content {
+            display: none;
             height: 100%;
-            min-height: 0;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .sidebar-tab-content.active {
+            display: flex;
         }
 
         .right-column {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            width: 100%;
             min-height: 0;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -1104,131 +1210,278 @@
             </div>
         </header>
 
-        <!-- Main Workspace -->
-        <div class="workspace">
+    <!-- Left Collapsible Sidebar -->
+    <div class="collapsible-sidebar" id="leftSidebar">
+        <!-- Sidebar Content Area -->
+        <div class="sidebar-content">
             
-            <!-- Left Column: Controls & Jobs Table -->
-            <div class="left-column">
+            <!-- Tab Content 1: Scraper Controls -->
+            <div class="sidebar-tab-content active" id="sidebarContentScraper">
+                <div class="panel-title" style="margin-bottom: 15px;">Scraper Controls</div>
+                <div class="form-group">
+                    <label for="scraperMode">Scraper Mode</label>
+                    <select id="scraperMode">
+                        <option value="fast" selected>Fast Playwright (Free)</option>
+                        <option value="ai">AI Agent (Requires Key)</option>
+                    </select>
+                </div>
                 
-                <!-- Controls Panel -->
-                <div class="glass-card controls-panel">
-                    <div class="panel-title">Scraper Controls</div>
-                    
-                    <div class="controls-layout">
-                        <!-- Left Side: Inputs and Settings -->
-                        <div class="controls-left-col">
-                            <div class="form-group">
-                                <label for="scraperMode">Scraper Mode</label>
-                                <select id="scraperMode">
-                                    <option value="fast" selected>Fast Playwright (Free)</option>
-                                    <option value="ai">AI Agent (Requires Key)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="keywords">Job Keywords</label>
-                                <input type="text" id="keywords" value="Software Engineer" placeholder="e.g. Software Engineer">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="location">Location</label>
-                                <input type="text" id="location" value="United States" placeholder="e.g. United States">
-                            </div>
-
-                            <!-- Collapsible LLM Settings -->
-                            <details class="llm-details-accordion" style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
-                                <summary style="cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
-                                    <span>ADVANCED LLM SETTINGS</span>
-                                    <span style="font-size: 0.7rem; font-weight: normal; color: var(--primary);">TOGGLE</span>
-                                </summary>
-                                <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
-                                    <div class="form-group">
-                                        <label for="llmProvider">LLM Provider</label>
-                                        <select id="llmProvider">
-                                            <option value="gemini">Gemini 2.5 Flash</option>
-                                            <option value="openai">OpenAI GPT-4o-mini</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="apiKey">LLM API Key</label>
-                                        <div class="api-key-container">
-                                            <input type="password" id="apiKey" placeholder="Enter API Key">
-                                            <button class="api-key-toggle" id="apiKeyToggle" type="button">SHOW</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </details>
-                        </div>
-
-                        <!-- Right Side: Action Buttons -->
-                        <div class="controls-right-col">
-                            <label style="margin-bottom: 2px;">Execution Actions</label>
-                            
-                            <button class="btn btn-start" id="startBtn" style="width: 100%;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                Start Scraping
-                            </button>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <button class="btn btn-pause" id="pauseBtn" disabled>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                                    Pause
-                                </button>
-                                <button class="btn btn-resume" id="resumeBtn" disabled>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                    Resume
-                                </button>
-                            </div>
-                            
-                            <button class="btn btn-stop" id="stopBtn" style="width: 100%;" disabled>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-                                Stop Scraper
-                            </button>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="keywords">Job Keywords</label>
+                    <input type="text" id="keywords" value="Software Engineer" placeholder="e.g. Software Engineer">
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" value="United States" placeholder="e.g. United States">
                 </div>
 
-                <!-- Bottom Panel: Scraped Jobs Database -->
-                <div class="glass-card jobs-section">
-                    <div class="jobs-header">
-                        <div class="panel-title" style="margin: 0; border: none; padding: 0;">Scraped Jobs Database</div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="text" id="tableSearch" class="search-bar" placeholder="Filter jobs by title, company...">
-                            <button class="view-btn" id="openFilterModalBtn" style="padding: 8px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; height: 36px; border-radius: 8px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                                </svg>
-                                <span>Filter & Sort</span>
-                                <span id="activeFilterCount" style="display: none; background: var(--primary); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 0.65rem; font-weight: bold; justify-content: center; align-items: center;">0</span>
-                            </button>
+                <details class="llm-details-accordion" style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                    <summary style="cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                        <span>ADVANCED LLM SETTINGS</span>
+                        <span style="font-size: 0.7rem; font-weight: normal; color: var(--primary);">TOGGLE</span>
+                    </summary>
+                    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+                        <div class="form-group">
+                            <label for="llmProvider">LLM Provider</label>
+                            <select id="llmProvider">
+                                <option value="gemini">Gemini 2.5 Flash</option>
+                                <option value="openai">OpenAI GPT-4o-mini</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="apiKey">LLM API Key</label>
+                            <div class="api-key-container">
+                                <input type="password" id="apiKey" placeholder="Enter API Key">
+                                <button class="api-key-toggle" id="apiKeyToggle" type="button">SHOW</button>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Job Title</th>
-                                    <th>Company</th>
-                                    <th>Location</th>
-                                    <th>Work Mode</th>
-                                    <th>Salary</th>
-                                    <th>Employment Type</th>
-                                    <th>Date Posted</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="jobsTableBody">
-                                <tr>
-                                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading database...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                </details>
 
+                <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                    <label style="margin-bottom: 2px; font-weight: 600; font-size: 0.8rem;">Execution Actions</label>
+                    <button class="btn btn-start" id="startBtn" style="width: 100%;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Start Scraping
+                    </button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="btn btn-pause" id="pauseBtn" disabled>Pause</button>
+                        <button class="btn btn-resume" id="resumeBtn" disabled>Resume</button>
+                    </div>
+                    <button class="btn btn-stop" id="stopBtn" style="width: 100%;" disabled>Stop Scraper</button>
+                </div>
             </div>
+
+            <!-- Tab Content 2: CV Matcher -->
+            <div class="sidebar-tab-content" id="sidebarContentCVMatcher" style="display: none; overflow-y: auto;">
+                <div class="panel-title" style="margin-bottom: 15px;">CV Matcher</div>
+                
+                <div id="sidebarMatchLoading" style="display: none; text-align: center; padding: 40px 20px;">
+                    <span class="status-dot animate-pulse" style="background: var(--primary); width: 16px; height: 16px; display: inline-block; border-radius: 50%;"></span>
+                    <p style="margin-top: 10px; color: var(--text-muted); font-size: 0.9rem;">Analyzing CV Match via LLM...</p>
+                </div>
+                
+                <div id="sidebarMatchNotRun" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; gap: 15px;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--primary); opacity: 0.8;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <div>
+                        <h4 style="font-family: var(--font-outfit); font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Select a Job Details</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); max-width: 300px;">Click "Details" on a job from the database below, then run the Suitability Match check here.</p>
+                    </div>
+                    <button class="btn btn-start" id="sidebarRunMatchBtn" style="padding: 8px 16px; margin: 0; font-size: 0.8rem; display: flex; align-items: center; gap: 8px;" disabled>
+                        Run Match Analysis
+                    </button>
+                </div>
+                
+                <div id="sidebarMatchResults" style="display: none; flex-direction: column; gap: 15px;">
+                    <div class="glass-card" style="padding: 15px; text-align: center; background: rgba(255,255,255,0.01);">
+                        <div class="match-score-circle" id="sidebarMatchScoreCircle" style="width: 80px; height: 80px;">
+                            <span class="match-score-number" id="sidebarMatchScoreVal" style="font-size: 1.6rem;">0%</span>
+                            <span class="match-score-label" style="font-size: 0.65rem;">Match</span>
+                        </div>
+                        <span id="sidebarMatchStatusLabel" style="font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 10px; display: inline-block; background: rgba(255,255,255,0.1);">Good Fit</span>
+                    </div>
+                    
+                    <div>
+                        <h4 style="font-family: var(--font-outfit); font-size: 0.85rem; font-weight: 700; color: var(--success); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Matched Strengths
+                        </h4>
+                        <div id="sidebarMatchedSkillsList" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="font-family: var(--font-outfit); font-size: 0.85rem; font-weight: 700; color: var(--danger); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            Missing Gaps
+                        </h4>
+                        <div id="sidebarMissingSkillsList" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="font-family: var(--font-outfit); font-size: 0.85rem; font-weight: 700; color: var(--warning); margin-bottom: 6px;">Tips & Recommendations</h4>
+                        <ul id="sidebarMatchTipsList" style="padding-left: 15px; font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px;"></ul>
+                    </div>
+
+                    <!-- Tailored Actions inside Left Sidebar -->
+                    <div style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                        <h4 style="font-family: var(--font-outfit); font-size: 0.85rem; font-weight: 700;">Tailor CV & Cover Letter</h4>
+                        
+                        <div id="sidebarTailorLoading" style="display: none; text-align: center; padding: 20px 5px;">
+                            <span class="status-dot animate-pulse" style="background: var(--primary); width: 10px; height: 10px; display: inline-block; border-radius: 50%;"></span>
+                            <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.75rem;">Drafting documents...</p>
+                        </div>
+                        
+                        <div id="sidebarTailorBtnSection" style="text-align: center; padding: 10px 5px;">
+                            <button class="btn btn-start" id="sidebarGenerateTailoredBtn" style="padding: 6px 12px; margin: 0; font-size: 0.8rem; width: 100%;">Generate Tailored Resumes & Cover Letter</button>
+                        </div>
+                        
+                        <!-- Toggle views inside CV Matcher Left sidebar -->
+                        <div id="sidebarTailoredDocsContainer" style="display: none; flex-direction: column; gap: 10px;">
+                            <div class="tailor-tab-container" style="margin-bottom: 6px;">
+                                <button class="tailor-tab-btn active" id="sidebarTailorTabBtnCover" style="padding: 6px 10px; font-size: 0.75rem;">Cover Letter</button>
+                                <button class="tailor-tab-btn" id="sidebarTailorTabBtnResume" style="padding: 6px 10px; font-size: 0.75rem;">Tailored Resume</button>
+                            </div>
+                            
+                            <div id="sidebarTailorCoverContent" style="display: flex; flex-direction: column; gap: 6px;">
+                                <textarea id="sidebarTailoredCoverLetter" style="width: 100%; height: 180px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--text-main); padding: 8px; font-family: var(--font-inter); font-size: 0.8rem; line-height: 1.3; resize: vertical; overflow-y: auto;" readonly></textarea>
+                                <button class="view-btn" id="sidebarCopyCoverBtn" style="padding: 4px 8px; font-size: 0.75rem; align-self: flex-end;">Copy Cover Letter</button>
+                            </div>
+                            
+                            <div id="sidebarTailorResumeContent" style="display: none; flex-direction: column; gap: 6px;">
+                                <textarea id="sidebarTailoredResumeMarkdown" style="width: 100%; height: 180px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--text-main); padding: 8px; font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.3; resize: vertical; overflow-y: auto;" readonly></textarea>
+                                <button class="view-btn" id="sidebarCopyResumeBtn" style="padding: 4px 8px; font-size: 0.75rem; align-self: flex-end;">Copy CV Markdown</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 3: My Profile -->
+            <div class="sidebar-tab-content" id="sidebarContentProfile" style="display: none; overflow-y: auto;">
+                <div class="panel-title" style="margin-bottom: 15px;">My Profile</div>
+                
+                <!-- Resume Import -->
+                <div class="glass-card" style="padding: 12px; margin-bottom: 15px; border-color: rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+                    <h5 style="font-family: var(--font-outfit); font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        Import Resume CV
+                    </h5>
+                    <textarea id="sidebarRawResumeText" style="width: 100%; height: 80px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--text-main); padding: 6px; font-family: var(--font-inter); font-size: 0.8rem; resize: vertical;" placeholder="Paste raw CV details here..."></textarea>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+                        <button class="btn btn-start" id="sidebarImportResumeBtn" style="padding: 6px 12px; margin: 0; font-size: 0.75rem;">Import & Parse via LLM</button>
+                    </div>
+                </div>
+
+                <!-- Profile Items lists -->
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 700; font-size: 0.85rem; color: #a5b4fc;">Experience</span>
+                            <button class="view-btn" onclick="openProfileItemModal('experience')" style="padding: 2px 6px; font-size: 0.7rem;">+ Add</button>
+                        </div>
+                        <div id="profile-experience-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 700; font-size: 0.85rem; color: #a5b4fc;">Projects</span>
+                            <button class="view-btn" onclick="openProfileItemModal('projects')" style="padding: 2px 6px; font-size: 0.7rem;">+ Add</button>
+                        </div>
+                        <div id="profile-projects-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 700; font-size: 0.85rem; color: #a5b4fc;">Skills</span>
+                            <button class="view-btn" onclick="openProfileItemModal('skills')" style="padding: 2px 6px; font-size: 0.7rem;">+ Add</button>
+                        </div>
+                        <div id="profile-skills-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 700; font-size: 0.85rem; color: #a5b4fc;">Education</span>
+                            <button class="view-btn" onclick="openProfileItemModal('education')" style="padding: 2px 6px; font-size: 0.7rem;">+ Add</button>
+                        </div>
+                        <div id="profile-education-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-weight: 700; font-size: 0.85rem; color: #a5b4fc;">Certifications</span>
+                            <button class="view-btn" onclick="openProfileItemModal('certifications')" style="padding: 2px 6px; font-size: 0.7rem;">+ Add</button>
+                        </div>
+                        <div id="profile-certifications-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Tab Selector Handle -->
+        <div class="sidebar-tabs-bar">
+            <button class="sidebar-tab-btn active" id="sidebarTabBtnScraper" title="Scraper Controls">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span class="tab-vertical-label">Scraper</span>
+            </button>
+            <button class="sidebar-tab-btn" id="sidebarTabBtnCVMatcher" title="CV Matcher">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+                <span class="tab-vertical-label">CV Matcher</span>
+            </button>
+            <button class="sidebar-tab-btn" id="sidebarTabBtnProfile" title="My Profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span class="tab-vertical-label">Profile</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+        
+        <!-- Bottom Panel: Scraped Jobs Database -->
+        <div class="glass-card jobs-section" style="order: 2; flex: 1.2; min-height: 0; display: flex; flex-direction: column;">
+            <div class="jobs-header" style="flex-shrink: 0;">
+                <div class="panel-title" style="margin: 0; border: none; padding: 0;">Scraped Jobs Database</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" id="tableSearch" class="search-bar" placeholder="Filter jobs by title, company...">
+                    <button class="view-btn" id="openFilterModalBtn" style="padding: 8px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; height: 36px; border-radius: 8px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        <span>Filter & Sort</span>
+                        <span id="activeFilterCount" style="display: none; background: var(--primary); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 0.65rem; font-weight: bold; justify-content: center; align-items: center;">0</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container" style="flex: 1; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Location</th>
+                            <th>Work Mode</th>
+                            <th>Salary</th>
+                            <th>Employment Type</th>
+                            <th>Date Posted</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobsTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading database...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
             <!-- Right Column: Viewport & Logs -->
             <div class="right-column" id="rightColumn">
@@ -1253,13 +1506,6 @@
                                         <line x1="12" y1="19" x2="20" y2="19"></line>
                                     </svg>
                                     <span>Logs</span>
-                                </button>
-                                <button class="tab-btn-horizontal" id="tabBtnProfile" title="My Master Profile">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
-                                    <span>My Profile</span>
                                 </button>
                             </div>
                         </div>
@@ -1313,70 +1559,6 @@
                             </div>
                         </div>
 
-                        <!-- Tab Content: My Profile -->
-                        <div class="tab-content" id="tabContentProfile" style="display: none; padding: 20px; overflow-y: auto; flex-direction: column; gap: 20px; height: 100%;">
-                            <!-- Resume Import Section -->
-                            <div class="glass-card" style="padding: 20px;">
-                                <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                    Import Resume
-                                </h3>
-                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Paste your raw resume/CV text here. The LLM will parse it to populate your master profile.</p>
-                                <textarea id="rawResumeText" style="width: 100%; height: 120px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); padding: 10px; font-family: var(--font-inter); font-size: 0.85rem; resize: vertical;" placeholder="Paste CV here..."></textarea>
-                                <div style="display: flex; justify-content: flex-end; margin-top: 10px; gap: 10px;">
-                                    <button class="btn btn-start" id="importResumeBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;">Parse & Import Profile</button>
-                                </div>
-                            </div>
-
-                            <!-- Master Profile Items List grouped by Section -->
-                            <div id="profileSectionsContainer" style="display: flex; flex-direction: column; gap: 20px;">
-                                <!-- Experience Section -->
-                                <div class="profile-section-card" data-section="experience">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Work Experience</h3>
-                                        <button class="view-btn" onclick="openProfileItemModal('experience')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Experience</button>
-                                    </div>
-                                    <div class="profile-items-list" id="profile-experience-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                                </div>
-
-                                <!-- Projects Section -->
-                                <div class="profile-section-card" data-section="projects">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Projects</h3>
-                                        <button class="view-btn" onclick="openProfileItemModal('projects')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Project</button>
-                                    </div>
-                                    <div class="profile-items-list" id="profile-projects-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                                </div>
-
-                                <!-- Skills Section -->
-                                <div class="profile-section-card" data-section="skills">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Skills & Core Competencies</h3>
-                                        <button class="view-btn" onclick="openProfileItemModal('skills')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Skill Category</button>
-                                    </div>
-                                    <div class="profile-items-list" id="profile-skills-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;"></div>
-                                </div>
-
-                                <!-- Education Section -->
-                                <div class="profile-section-card" data-section="education">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Education</h3>
-                                        <button class="view-btn" onclick="openProfileItemModal('education')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Education</button>
-                                    </div>
-                                    <div class="profile-items-list" id="profile-education-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                                </div>
-
-                                <!-- Certifications Section -->
-                                <div class="profile-section-card" data-section="certifications">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Certifications</h3>
-                                        <button class="view-btn" onclick="openProfileItemModal('certifications')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Certification</button>
-                                    </div>
-                                    <div class="profile-items-list" id="profile-certifications-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                     
                 </div>
@@ -1387,8 +1569,9 @@
     </div>
 
     <!-- Description Modal -->
+    <!-- Description Modal -->
     <div id="jobModal" class="modal-overlay">
-        <div class="modal-content" style="width: 900px; max-width: 95%; height: 650px; max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-content" style="width: 800px; max-width: 95%; height: 600px; max-height: 90vh; display: flex; flex-direction: column;">
             <div class="modal-header" style="flex-shrink: 0;">
                 <div class="modal-title-container">
                     <h2 id="modalTitle">Software Engineer</h2>
@@ -1397,106 +1580,9 @@
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
             
-            <div class="modal-tabs-header" style="display: flex; border-bottom: 1px solid var(--glass-border); padding: 0 20px; flex-shrink: 0; background: rgba(0,0,0,0.1);">
-                <button class="modal-tab-btn active" id="modalTabBtnDesc">Job Description</button>
-                <button class="modal-tab-btn" id="modalTabBtnMatch">
-                    <span>Match & Tailor</span>
-                    <span id="modalMatchBadge" style="background: var(--primary); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; display: none;">0%</span>
-                </button>
-            </div>
-            
             <div class="modal-body-container" style="flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0;">
                 <div class="modal-body" id="modalBody" style="padding: 20px; flex: 1; overflow-y: auto;">
                     <!-- Description content injected here -->
-                </div>
-                
-                <div class="modal-body" id="modalMatchContent" style="padding: 20px; flex: 1; display: none; overflow-y: auto;">
-                    <div id="matchLoading" style="display: none; text-align: center; padding: 40px 20px;">
-                        <span class="status-dot animate-pulse" style="background: var(--primary); width: 16px; height: 16px; display: inline-block; border-radius: 50%;"></span>
-                        <p style="margin-top: 10px; color: var(--text-muted); font-size: 0.9rem;">Analyzing CV Match and identifying gaps via LLM...</p>
-                    </div>
-                    
-                    <div id="matchNotRun" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; gap: 15px;">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); opacity: 0.8;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        <div>
-                            <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Check Job Suitability</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 400px; margin: 0 auto;">Compare this job description against your Master Profile to calculate your match score and identify any missing skills.</p>
-                        </div>
-                        <button class="btn btn-start" id="runMatchBtn" style="padding: 10px 20px; margin: 0; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            Run Match Analysis
-                        </button>
-                    </div>
-                    
-                    <div id="matchResults" style="display: none; flex-direction: column; gap: 20px; height: 100%;">
-                        <div class="match-layout" style="height: 100%;">
-                            <!-- Left Col: Suitability Details -->
-                            <div style="display: flex; flex-direction: column; gap: 16px; border-right: 1px solid var(--glass-border); padding-right: 20px; overflow-y: auto;">
-                                <div class="glass-card" style="padding: 15px; text-align: center; background: rgba(255,255,255,0.01);">
-                                    <div class="match-score-circle" id="matchScoreCircle">
-                                        <span class="match-score-number" id="matchScoreVal">0%</span>
-                                        <span class="match-score-label">Match</span>
-                                    </div>
-                                    <span id="matchStatusLabel" style="font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; display: inline-block; background: rgba(255,255,255,0.1);">Good Fit</span>
-                                </div>
-                                
-                                <div>
-                                    <h4 style="font-family: var(--font-outfit); font-size: 0.9rem; font-weight: 700; color: var(--success); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        Matched Strengths
-                                    </h4>
-                                    <div id="matchedSkillsList" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
-                                </div>
-                                
-                                <div>
-                                    <h4 style="font-family: var(--font-outfit); font-size: 0.9rem; font-weight: 700; color: var(--danger); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                                        Missing Skills & Gaps
-                                    </h4>
-                                    <div id="missingSkillsList" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
-                                </div>
-                                
-                                <div>
-                                    <h4 style="font-family: var(--font-outfit); font-size: 0.9rem; font-weight: 700; color: var(--warning); margin-bottom: 8px;">Quick Tips</h4>
-                                    <ul id="matchTipsList" style="padding-left: 15px; font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;"></ul>
-                                </div>
-                            </div>
-                            
-                            <!-- Right Col: Cover Letter & Tailored Resume Suggestions -->
-                            <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden;">
-                                <div class="tailor-tab-container">
-                                    <button class="tailor-tab-btn active" id="tailorTabBtnCover">Cover Letter</button>
-                                    <button class="tailor-tab-btn" id="tailorTabBtnResume">Tailored Resume</button>
-                                </div>
-                                
-                                <div id="tailorLoading" style="display: none; text-align: center; padding: 40px 10px;">
-                                    <span class="status-dot animate-pulse" style="background: var(--primary); width: 12px; height: 12px; display: inline-block; border-radius: 50%;"></span>
-                                    <p style="margin-top: 10px; color: var(--text-muted); font-size: 0.8rem;">Drafting cover letter & tailored CV adjustments via LLM...</p>
-                                </div>
-                                
-                                <div id="tailorBtnSection" style="text-align: center; padding: 30px 10px;">
-                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Generate a customized cover letter and resume markdown edits tailored to this job.</p>
-                                    <button class="btn btn-start" id="generateTailoredBtn" style="padding: 8px 16px; margin: 0; font-size: 0.8rem;">Generate Cover Letter & Tailored CV</button>
-                                </div>
-                                
-                                <!-- Cover Letter text area -->
-                                <div id="tailorCoverContent" style="display: none; flex-direction: column; flex: 1; min-height: 0; gap: 8px; overflow: hidden;">
-                                    <textarea id="tailoredCoverLetter" style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); padding: 12px; font-family: var(--font-inter); font-size: 0.85rem; line-height: 1.4; resize: none; overflow-y: auto;" readonly></textarea>
-                                    <div style="display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
-                                        <button class="view-btn" id="copyCoverBtn" style="padding: 6px 12px; font-size: 0.8rem;">Copy Cover Letter</button>
-                                    </div>
-                                </div>
-                                
-                                <!-- Tailored Resume adjustments -->
-                                <div id="tailorResumeContent" style="display: none; flex-direction: column; flex: 1; min-height: 0; gap: 8px; overflow: hidden;">
-                                    <textarea id="tailoredResumeMarkdown" style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); padding: 12px; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.4; resize: none; overflow-y: auto;" readonly></textarea>
-                                    <div style="display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
-                                        <button class="view-btn" id="copyResumeBtn" style="padding: 6px 12px; font-size: 0.8rem;">Copy CV Markdown</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             
@@ -2321,7 +2407,6 @@
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             ) : '';
         }
-
         // View Details Modal
         window.openJobDetails = function(jobId) {
             const job = allJobs.find(j => j.job_id === jobId);
@@ -2340,23 +2425,21 @@
             
             modalLink.href = job.url;
             
-            // Set match badge if match exists
-            const matchBadge = document.getElementById('modalMatchBadge');
-            if (job.suitability_score !== null && job.suitability_score !== undefined) {
-                matchBadge.style.display = 'inline-block';
-                matchBadge.textContent = `${job.suitability_score}%`;
-            } else {
-                matchBadge.style.display = 'none';
-            }
-            
-            // Reset modal tabs to job description
-            switchModalTab('desc');
-            
             jobModal.style.display = 'flex';
             setTimeout(() => {
                 jobModal.style.opacity = '1';
                 jobModal.querySelector('.modal-content').style.transform = 'scale(1)';
             }, 50);
+            
+            // Enable the sidebar match button and populate info
+            const sidebarRunMatchBtn = document.getElementById('sidebarRunMatchBtn');
+            if (sidebarRunMatchBtn) {
+                sidebarRunMatchBtn.disabled = false;
+            }
+            
+            showSidebarMatchInfo();
+            // Automatically switch left sidebar tab to CV Matcher so the user can see match results
+            switchSidebarTab('cvmatcher');
         };
 
         function closeJobModal() {
@@ -2556,21 +2639,17 @@
             });
         });
 
-        // Tab switching logic
+        // Tab switching logic for main workspace
         const tabBtnBrowser = document.getElementById('tabBtnBrowser');
         const tabBtnLogs = document.getElementById('tabBtnLogs');
-        const tabBtnProfile = document.getElementById('tabBtnProfile');
         const tabContentBrowser = document.getElementById('tabContentBrowser');
         const tabContentLogs = document.getElementById('tabContentLogs');
-        const tabContentProfile = document.getElementById('tabContentProfile');
 
         function switchTab(tabName) {
             tabBtnBrowser.classList.remove('active');
             tabBtnLogs.classList.remove('active');
-            tabBtnProfile.classList.remove('active');
             tabContentBrowser.classList.remove('active');
             tabContentLogs.classList.remove('active');
-            tabContentProfile.classList.remove('active');
 
             if (tabName === 'browser') {
                 tabBtnBrowser.classList.add('active');
@@ -2578,16 +2657,44 @@
             } else if (tabName === 'logs') {
                 tabBtnLogs.classList.add('active');
                 tabContentLogs.classList.add('active');
-            } else if (tabName === 'profile') {
-                tabBtnProfile.classList.add('active');
-                tabContentProfile.classList.add('active');
-                fetchProfile();
             }
         }
 
         tabBtnBrowser.addEventListener('click', () => switchTab('browser'));
         tabBtnLogs.addEventListener('click', () => switchTab('logs'));
-        tabBtnProfile.addEventListener('click', () => switchTab('profile'));
+
+        // Left Sidebar Tab switching logic
+        const sidebarTabBtnScraper = document.getElementById('sidebarTabBtnScraper');
+        const sidebarTabBtnCVMatcher = document.getElementById('sidebarTabBtnCVMatcher');
+        const sidebarTabBtnProfile = document.getElementById('sidebarTabBtnProfile');
+        const sidebarContentScraper = document.getElementById('sidebarContentScraper');
+        const sidebarContentCVMatcher = document.getElementById('sidebarContentCVMatcher');
+        const sidebarContentProfile = document.getElementById('sidebarContentProfile');
+
+        function switchSidebarTab(tabName) {
+            sidebarTabBtnScraper.classList.remove('active');
+            sidebarTabBtnCVMatcher.classList.remove('active');
+            sidebarTabBtnProfile.classList.remove('active');
+            sidebarContentScraper.classList.remove('active');
+            sidebarContentCVMatcher.classList.remove('active');
+            sidebarContentProfile.classList.remove('active');
+
+            if (tabName === 'scraper') {
+                sidebarTabBtnScraper.classList.add('active');
+                sidebarContentScraper.classList.add('active');
+            } else if (tabName === 'cvmatcher') {
+                sidebarTabBtnCVMatcher.classList.add('active');
+                sidebarContentCVMatcher.classList.add('active');
+            } else if (tabName === 'profile') {
+                sidebarTabBtnProfile.classList.add('active');
+                sidebarContentProfile.classList.add('active');
+                fetchProfile();
+            }
+        }
+
+        sidebarTabBtnScraper.addEventListener('click', () => switchSidebarTab('scraper'));
+        sidebarTabBtnCVMatcher.addEventListener('click', () => switchSidebarTab('cvmatcher'));
+        sidebarTabBtnProfile.addEventListener('click', () => switchSidebarTab('profile'));
 
         // Profile Management state
         let currentProfile = {};
@@ -2782,11 +2889,11 @@
         };
 
         // Resume Import Handler
-        const importResumeBtn = document.getElementById('importResumeBtn');
-        const rawResumeText = document.getElementById('rawResumeText');
+        const sidebarImportResumeBtn = document.getElementById('sidebarImportResumeBtn');
+        const sidebarRawResumeText = document.getElementById('sidebarRawResumeText');
         
-        importResumeBtn.addEventListener('click', async () => {
-            const text = rawResumeText.value.trim();
+        sidebarImportResumeBtn.addEventListener('click', async () => {
+            const text = sidebarRawResumeText.value.trim();
             const key = apiKeyInput.value.trim();
             const provider = llmProviderInput.value;
             
@@ -2799,8 +2906,8 @@
                 return;
             }
             
-            importResumeBtn.disabled = true;
-            importResumeBtn.textContent = "Parsing Resume...";
+            sidebarImportResumeBtn.disabled = true;
+            sidebarImportResumeBtn.textContent = "Parsing Resume...";
             
             try {
                 const res = await fetch('/api/profile/import', {
@@ -2811,7 +2918,7 @@
                 const data = await res.json();
                 if (data.status === 'success') {
                     alert("Resume parsed successfully!");
-                    rawResumeText.value = '';
+                    sidebarRawResumeText.value = '';
                     fetchProfile();
                 } else {
                     alert("Error parsing resume: " + data.message);
@@ -2820,81 +2927,56 @@
                 console.error("Import resume error:", err);
                 alert("An unexpected error occurred during resume import.");
             } finally {
-                importResumeBtn.disabled = false;
-                importResumeBtn.textContent = "Parse & Import Profile";
+                sidebarImportResumeBtn.disabled = false;
+                sidebarImportResumeBtn.textContent = "Import & Parse via LLM";
             }
         });
 
-        // Job Details Modal Tab Controls
-        const modalTabBtnDesc = document.getElementById('modalTabBtnDesc');
-        const modalTabBtnMatch = document.getElementById('modalTabBtnMatch');
-        const modalBody = document.getElementById('modalBody');
-        const modalMatchContent = document.getElementById('modalMatchContent');
+        // Left Sidebar Tailor cover/resume tabs toggle
+        const sidebarTailorTabBtnCover = document.getElementById('sidebarTailorTabBtnCover');
+        const sidebarTailorTabBtnResume = document.getElementById('sidebarTailorTabBtnResume');
+        const sidebarTailorCoverContent = document.getElementById('sidebarTailorCoverContent');
+        const sidebarTailorResumeContent = document.getElementById('sidebarTailorResumeContent');
         
-        window.switchModalTab = function(tabName) {
-            modalTabBtnDesc.classList.remove('active');
-            modalTabBtnMatch.classList.remove('active');
-            modalBody.style.display = 'none';
-            modalMatchContent.style.display = 'none';
-            
-            if (tabName === 'desc') {
-                modalTabBtnDesc.classList.add('active');
-                modalBody.style.display = 'block';
-            } else if (tabName === 'match') {
-                modalTabBtnMatch.classList.add('active');
-                modalMatchContent.style.display = 'block';
-                showMatchTabInfo();
-            }
-        }
-        
-        modalTabBtnDesc.addEventListener('click', () => switchModalTab('desc'));
-        modalTabBtnMatch.addEventListener('click', () => switchModalTab('match'));
-        
-        // Tailor cover/resume tabs toggle
-        const tailorTabBtnCover = document.getElementById('tailorTabBtnCover');
-        const tailorTabBtnResume = document.getElementById('tailorTabBtnResume');
-        const tailorCoverContent = document.getElementById('tailorCoverContent');
-        const tailorResumeContent = document.getElementById('tailorResumeContent');
-        
-        window.switchTailorTab = function(tabName) {
-            tailorTabBtnCover.classList.remove('active');
-            tailorTabBtnResume.classList.remove('active');
-            tailorCoverContent.style.display = 'none';
-            tailorResumeContent.style.display = 'none';
+        window.switchSidebarTailorTab = function(tabName) {
+            sidebarTailorTabBtnCover.classList.remove('active');
+            sidebarTailorTabBtnResume.classList.remove('active');
+            sidebarTailorCoverContent.style.display = 'none';
+            sidebarTailorResumeContent.style.display = 'none';
             
             if (tabName === 'cover') {
-                tailorTabBtnCover.classList.add('active');
-                tailorCoverContent.style.display = 'flex';
+                sidebarTailorTabBtnCover.classList.add('active');
+                sidebarTailorCoverContent.style.display = 'flex';
             } else if (tabName === 'resume') {
-                tailorTabBtnResume.classList.add('active');
-                tailorResumeContent.style.display = 'flex';
+                sidebarTailorTabBtnResume.classList.add('active');
+                sidebarTailorResumeContent.style.display = 'flex';
             }
         }
         
-        tailorTabBtnCover.addEventListener('click', () => switchTailorTab('cover'));
-        tailorTabBtnResume.addEventListener('click', () => switchTailorTab('resume'));
+        sidebarTailorTabBtnCover.addEventListener('click', () => switchSidebarTailorTab('cover'));
+        sidebarTailorTabBtnResume.addEventListener('click', () => switchSidebarTailorTab('resume'));
 
-        // Display current job matching state in modal
+        // Display current job matching state in Left Sidebar CV Matcher
         let activeJobForMatch = null;
         
-        function showMatchTabInfo() {
+        window.showSidebarMatchInfo = function() {
             if (!activeJobForMatch) return;
             
-            const matchNotRun = document.getElementById('matchNotRun');
-            const matchResults = document.getElementById('matchResults');
-            const matchLoading = document.getElementById('matchLoading');
+            const sidebarMatchNotRun = document.getElementById('sidebarMatchNotRun');
+            const sidebarMatchResults = document.getElementById('sidebarMatchResults');
+            const sidebarMatchLoading = document.getElementById('sidebarMatchLoading');
             
-            matchLoading.style.display = 'none';
+            sidebarMatchLoading.style.display = 'none';
             
             if (activeJobForMatch.suitability_score !== null && activeJobForMatch.suitability_score !== undefined) {
-                matchNotRun.style.display = 'none';
-                matchResults.style.display = 'flex';
+                sidebarMatchNotRun.style.display = 'none';
+                sidebarMatchResults.style.display = 'flex';
                 
                 const val = activeJobForMatch.suitability_score;
-                document.getElementById('matchScoreVal').textContent = `${val}%`;
+                document.getElementById('sidebarMatchScoreVal').textContent = `${val}%`;
                 
-                const circle = document.getElementById('matchScoreCircle');
-                const badge = document.getElementById('matchStatusLabel');
+                const circle = document.getElementById('sidebarMatchScoreCircle');
+                const badge = document.getElementById('sidebarMatchStatusLabel');
                 
                 if (val >= 80) {
                     circle.style.borderColor = 'var(--success)';
@@ -2918,7 +3000,7 @@
                 
                 const analysis = activeJobForMatch.match_analysis ? JSON.parse(activeJobForMatch.match_analysis) : {};
                 
-                const matchedList = document.getElementById('matchedSkillsList');
+                const matchedList = document.getElementById('sidebarMatchedSkillsList');
                 matchedList.innerHTML = '';
                 (analysis.matched_skills || []).forEach(sk => {
                     const tag = document.createElement('span');
@@ -2930,7 +3012,7 @@
                     matchedList.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">None parsed.</span>';
                 }
                 
-                const missingList = document.getElementById('missingSkillsList');
+                const missingList = document.getElementById('sidebarMissingSkillsList');
                 missingList.innerHTML = '';
                 (analysis.missing_skills || []).forEach(sk => {
                     const tag = document.createElement('span');
@@ -2942,7 +3024,7 @@
                     missingList.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">None detected.</span>';
                 }
                 
-                const tipsList = document.getElementById('matchTipsList');
+                const tipsList = document.getElementById('sidebarMatchTipsList');
                 tipsList.innerHTML = '';
                 (analysis.tips || []).forEach(tip => {
                     const li = document.createElement('li');
@@ -2953,31 +3035,32 @@
                     tipsList.innerHTML = '<li style="list-style:none; color:var(--text-muted);">No recommendations needed.</li>';
                 }
                 
-                document.getElementById('tailorBtnSection').style.display = 'block';
-                document.getElementById('tailorCoverContent').style.display = 'none';
-                document.getElementById('tailorResumeContent').style.display = 'none';
-                document.getElementById('tailorLoading').style.display = 'none';
-                switchTailorTab('cover');
+                document.getElementById('sidebarTailorBtnSection').style.display = 'block';
+                document.getElementById('sidebarTailorCoverContent').style.display = 'none';
+                document.getElementById('sidebarTailorResumeContent').style.display = 'none';
+                document.getElementById('sidebarTailorLoading').style.display = 'none';
+                document.getElementById('sidebarTailoredDocsContainer').style.display = 'none';
+                switchSidebarTailorTab('cover');
                 
             } else {
-                matchNotRun.style.display = 'flex';
-                matchResults.style.display = 'none';
+                sidebarMatchNotRun.style.display = 'flex';
+                sidebarMatchResults.style.display = 'none';
             }
-        }
-        
-        // Run Match Button Handler
-        const runMatchBtn = document.getElementById('runMatchBtn');
-        runMatchBtn.addEventListener('click', async () => {
+        };
+
+        // Sidebar Run Match Button Handler
+        const sidebarRunMatchBtn = document.getElementById('sidebarRunMatchBtn');
+        sidebarRunMatchBtn.addEventListener('click', async () => {
             const key = apiKeyInput.value.trim();
             const provider = llmProviderInput.value;
             if (!key) {
-                alert("An LLM API Key is required to run matching. Please set it in 'Advanced LLM Settings' first.");
+                alert("An LLM API Key is required to run matching. Please set it in 'Advanced LLM Settings' in the left Scraper Controls panel first.");
                 return;
             }
             if (!activeJobForMatch) return;
             
-            document.getElementById('matchNotRun').style.display = 'none';
-            document.getElementById('matchLoading').style.display = 'block';
+            document.getElementById('sidebarMatchNotRun').style.display = 'none';
+            document.getElementById('sidebarMatchLoading').style.display = 'block';
             
             try {
                 const res = await fetch(`/api/jobs/${activeJobForMatch.job_id}/match`, {
@@ -2990,26 +3073,22 @@
                     activeJobForMatch.suitability_score = data.suitability_score;
                     activeJobForMatch.match_analysis = JSON.stringify(data.match_analysis);
                     
-                    const matchBadge = document.getElementById('modalMatchBadge');
-                    matchBadge.style.display = 'inline-block';
-                    matchBadge.textContent = `${data.suitability_score}%`;
-                    
-                    showMatchTabInfo();
+                    showSidebarMatchInfo();
                     fetchJobs();
                 } else {
                     alert("Matchmaking error: " + data.message);
-                    showMatchTabInfo();
+                    showSidebarMatchInfo();
                 }
             } catch (err) {
                 console.error("Match error:", err);
                 alert("An unexpected error occurred during matchmaking.");
-                showMatchTabInfo();
+                showSidebarMatchInfo();
             }
         });
         
-        // Generate Tailored Resume and Cover Letter
-        const generateTailoredBtn = document.getElementById('generateTailoredBtn');
-        generateTailoredBtn.addEventListener('click', async () => {
+        // Sidebar Generate Tailored Resume and Cover Letter
+        const sidebarGenerateTailoredBtn = document.getElementById('sidebarGenerateTailoredBtn');
+        sidebarGenerateTailoredBtn.addEventListener('click', async () => {
             const key = apiKeyInput.value.trim();
             const provider = llmProviderInput.value;
             if (!key) {
@@ -3018,8 +3097,8 @@
             }
             if (!activeJobForMatch) return;
             
-            document.getElementById('tailorBtnSection').style.display = 'none';
-            document.getElementById('tailorLoading').style.display = 'block';
+            document.getElementById('sidebarTailorBtnSection').style.display = 'none';
+            document.getElementById('sidebarTailorLoading').style.display = 'block';
             
             try {
                 const res = await fetch(`/api/jobs/${activeJobForMatch.job_id}/tailor`, {
@@ -3029,32 +3108,33 @@
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    document.getElementById('tailoredCoverLetter').value = data.cover_letter_text;
-                    document.getElementById('tailoredResumeMarkdown').value = data.tailored_resume_markdown;
+                    document.getElementById('sidebarTailoredCoverLetter').value = data.cover_letter_text;
+                    document.getElementById('sidebarTailoredResumeMarkdown').value = data.tailored_resume_markdown;
                     
-                    document.getElementById('tailorLoading').style.display = 'none';
-                    switchTailorTab('cover');
+                    document.getElementById('sidebarTailorLoading').style.display = 'none';
+                    document.getElementById('sidebarTailoredDocsContainer').style.display = 'flex';
+                    switchSidebarTailorTab('cover');
                 } else {
                     alert("Tailoring error: " + data.message);
-                    document.getElementById('tailorBtnSection').style.display = 'block';
-                    document.getElementById('tailorLoading').style.display = 'none';
+                    document.getElementById('sidebarTailorBtnSection').style.display = 'block';
+                    document.getElementById('sidebarTailorLoading').style.display = 'none';
                 }
             } catch (err) {
                 console.error("Tailoring error:", err);
                 alert("An unexpected error occurred during tailoring.");
-                document.getElementById('tailorBtnSection').style.display = 'block';
-                document.getElementById('tailorLoading').style.display = 'none';
+                document.getElementById('sidebarTailorBtnSection').style.display = 'block';
+                document.getElementById('sidebarTailorLoading').style.display = 'none';
             }
         });
         
-        // Clipboard actions
-        document.getElementById('copyCoverBtn').addEventListener('click', () => {
-            const text = document.getElementById('tailoredCoverLetter').value;
+        // Sidebar Clipboard actions
+        document.getElementById('sidebarCopyCoverBtn').addEventListener('click', () => {
+            const text = document.getElementById('sidebarTailoredCoverLetter').value;
             navigator.clipboard.writeText(text);
             alert("Cover letter copied to clipboard!");
         });
-        document.getElementById('copyResumeBtn').addEventListener('click', () => {
-            const text = document.getElementById('tailoredResumeMarkdown').value;
+        document.getElementById('sidebarCopyResumeBtn').addEventListener('click', () => {
+            const text = document.getElementById('sidebarTailoredResumeMarkdown').value;
             navigator.clipboard.writeText(text);
             alert("Tailored CV copied to clipboard!");
         });
@@ -3089,6 +3169,7 @@
         // Connect WebSocket and fetch database records on load
         connectWebSocket();
         fetchJobs();
+        fetchProfile();
 
     </script>
 </body>
