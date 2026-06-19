@@ -44,16 +44,39 @@ def init_db():
             employment_type TEXT,
             work_mode TEXT,
             description TEXT,
-            scraped_at TEXT
+            scraped_at TEXT,
+            suitability_score INTEGER,
+            match_analysis TEXT
         )
     """)
-    # Migration: add work_mode column if database already existed without it
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_profile (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            section TEXT,
+            title TEXT,
+            subtitle TEXT,
+            date_range TEXT,
+            description TEXT
+        )
+    """)
+    # Migration: add columns if database already existed without them
     try:
         cursor.execute("ALTER TABLE jobs ADD COLUMN work_mode TEXT")
         conn.commit()
     except sqlite3.OperationalError:
         pass
+    try:
+        cursor.execute("ALTER TABLE jobs ADD COLUMN suitability_score INTEGER")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE jobs ADD COLUMN match_analysis TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass
     conn.close()
+
 
 def get_existing_job_ids():
     conn = sqlite3.connect(DB_PATH)
@@ -76,7 +99,8 @@ def sync_csv_from_db():
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
-            writer.writerow(dict(row))
+            row_dict = {k: v for k, v in dict(row).items() if k in fieldnames}
+            writer.writerow(row_dict)
     logger.info(f"Synchronized {len(rows)} jobs from SQLite to CSV.")
 
 init_db()
@@ -87,9 +111,20 @@ def save_job_data(job):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT OR REPLACE INTO jobs 
+        INSERT INTO jobs 
         (job_id, title, company, location, url, date_posted, salary, employment_type, work_mode, description, scraped_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(job_id) DO UPDATE SET
+            title=excluded.title,
+            company=excluded.company,
+            location=excluded.location,
+            url=excluded.url,
+            date_posted=excluded.date_posted,
+            salary=excluded.salary,
+            employment_type=excluded.employment_type,
+            work_mode=excluded.work_mode,
+            description=excluded.description,
+            scraped_at=excluded.scraped_at
     """, (
         job["job_id"],
         job["title"],
@@ -113,7 +148,8 @@ def save_job_data(job):
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         if not file_exists:
             writer.writeheader()
-        writer.writerow(job)
+        job_dict = {k: v for k, v in job.items() if k in fieldnames}
+        writer.writerow(job_dict)
 
 def extract_job_id(url):
     match = re.search(r"/view/(\d+)", url)
@@ -900,6 +936,294 @@ async def get_jobs():
     jobs = [dict(row) for row in rows]
     conn.close()
     return jobs
+
+# Helper to clean and parse LLM JSON responses
+def parse_json_response(content: str):
+    cleaned = content.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    elif cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    cleaned = cleaned.strip()
+    return json.loads(cleaned)
+
+# Pydantic Request/Response Models for Profile Matching
+class ProfileItem(BaseModel):
+    section: str
+    title: str
+    subtitle: str = ""
+    date_range: str = ""
+    description: str = ""
+
+class ImportRequest(BaseModel):
+    text: str
+    api_key: str
+    llm_provider: str = "gemini"
+
+class MatchRequest(BaseModel):
+    api_key: str
+    llm_provider: str = "gemini"
+
+class TailorRequest(BaseModel):
+    api_key: str
+    llm_provider: str = "gemini"
+
+@app.get("/api/profile")
+async def get_profile():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_profile")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    profile = {
+        "experience": [],
+        "projects": [],
+        "skills": [],
+        "certifications": [],
+        "education": []
+    }
+    for row in rows:
+        item = dict(row)
+        sec = item["section"]
+        if sec in profile:
+            profile[sec].append(item)
+    return profile
+
+@app.post("/api/profile")
+async def add_profile_item(item: ProfileItem):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO user_profile (section, title, subtitle, date_range, description)
+        VALUES (?, ?, ?, ?, ?)
+    """, (item.section, item.title, item.subtitle, item.date_range, item.description))
+    conn.commit()
+    conn.close()
+    return {"status": "success"}
+
+@app.put("/api/profile/{item_id}")
+async def update_profile_item(item_id: int, item: ProfileItem):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE user_profile 
+        SET section = ?, title = ?, subtitle = ?, date_range = ?, description = ?
+        WHERE id = ?
+    """, (item.section, item.title, item.subtitle, item.date_range, item.description, item_id))
+    conn.commit()
+    conn.close()
+    return {"status": "success"}
+
+@app.delete("/api/profile/{item_id}")
+async def delete_profile_item(item_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM user_profile WHERE id = ?", (item_id,))
+    conn.commit()
+    conn.close()
+    return {"status": "success"}
+
+@app.post("/api/profile/import")
+async def import_profile(req: ImportRequest):
+    try:
+        if req.llm_provider == "gemini":
+            llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=req.api_key)
+        elif req.llm_provider == "openai":
+            llm = ChatOpenAI(model="gpt-4o-mini", api_key=req.api_key)
+        else:
+            return {"status": "error", "message": "Invalid LLM provider"}
+            
+        prompt = (
+            "You are a professional CV parser. Parse the following raw resume text into structured JSON.\n"
+            "Categorize the content into: 'experience' (jobs), 'projects', 'skills', 'certifications', 'education'.\n"
+            "Return ONLY a valid JSON object matching this schema:\n"
+            "{\n"
+            "  \"experience\": [\n"
+            "     { \"title\": \"Job Title\", \"subtitle\": \"Company/Org Name\", \"date_range\": \"e.g., 2020 - 2023\", \"description\": \"Bullet points or description\" }\n"
+            "  ],\n"
+            "  \"projects\": [\n"
+            "     { \"title\": \"Project Name\", \"subtitle\": \"Technologies/URL/Platform\", \"date_range\": \"Year/Date\", \"description\": \"Description of project\" }\n"
+            "  ],\n"
+            "  \"skills\": [\n"
+            "     { \"title\": \"Skill Category (e.g. Languages, Web Tools)\", \"subtitle\": \"List of skills (e.g. Python, JS)\", \"date_range\": \"\", \"description\": \"\" }\n"
+            "  ],\n"
+            "  \"certifications\": [\n"
+            "     { \"title\": \"Certification Name\", \"subtitle\": \"Issuing Organization\", \"date_range\": \"Year/Date\", \"description\": \"\" }\n"
+            "  ],\n"
+            "  \"education\": [\n"
+            "     { \"title\": \"Degree / Program\", \"subtitle\": \"School / University\", \"date_range\": \"Start - End\", \"description\": \"\" }\n"
+            "  ]\n"
+            "}\n"
+            "Do not include any notes, markdown code block backticks (like ```json), or explanations. Output pure raw JSON.\n\n"
+            f"Resume Text:\n{req.text}"
+        )
+        
+        response = await llm.ainvoke(prompt)
+        parsed = parse_json_response(response.content)
+        
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        for section_name, items in parsed.items():
+            if section_name not in ["experience", "projects", "skills", "certifications", "education"]:
+                continue
+            for item in items:
+                cursor.execute("""
+                    INSERT INTO user_profile (section, title, subtitle, date_range, description)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    section_name,
+                    item.get("title", ""),
+                    item.get("subtitle", ""),
+                    item.get("date_range", ""),
+                    item.get("description", "")
+                ))
+        conn.commit()
+        conn.close()
+        return {"status": "success", "parsed": parsed}
+    except Exception as e:
+        logger.error(f"Error parsing resume: {e}")
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/jobs/{job_id}/match")
+async def match_job(job_id: str, req: MatchRequest):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,))
+        job_row = cursor.fetchone()
+        if not job_row:
+            conn.close()
+            return {"status": "error", "message": "Job not found"}
+        job = dict(job_row)
+        
+        cursor.execute("SELECT * FROM user_profile")
+        profile_rows = cursor.fetchall()
+        conn.close()
+        
+        profile_text = ""
+        for p in profile_rows:
+            p_dict = dict(p)
+            profile_text += f"[{p_dict['section'].upper()}] {p_dict['title']} | {p_dict['subtitle']} ({p_dict['date_range']})\nDescription: {p_dict['description']}\n\n"
+            
+        if req.llm_provider == "gemini":
+            llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=req.api_key)
+        elif req.llm_provider == "openai":
+            llm = ChatOpenAI(model="gpt-4o-mini", api_key=req.api_key)
+        else:
+            return {"status": "error", "message": "Invalid LLM provider"}
+            
+        prompt = (
+            "You are an expert ATS (Applicant Tracking System) and professional recruiter.\n"
+            "Compare the user's CV Profile against the Job Description.\n\n"
+            "--- USER PROFILE ---\n"
+            f"{profile_text}\n\n"
+            "--- JOB DESCRIPTION ---\n"
+            f"Title: {job['title']}\n"
+            f"Company: {job['company']}\n"
+            f"Description: {job['description']}\n\n"
+            "Analyze the suitability of the user for this job.\n"
+            "Calculate a suitability score between 0 and 100 representing how well the candidate matches the job requirements.\n"
+            "Identify matched skills/strengths, missing skills/gaps (requirements in JD not covered/emphasized in user profile), and provide brief specific recommendations/tips.\n\n"
+            "Return ONLY a valid JSON object matching this schema:\n"
+            "{\n"
+            "  \"suitability_score\": 85,\n"
+            "  \"matched_skills\": [\"Python\", \"Docker\"],\n"
+            "  \"missing_skills\": [\"Kubernetes\", \"AWS EKS\"],\n"
+            "  \"tips\": [\n"
+            "    \"Highlight your experience with Kubernetes as it is a major requirement.\",\n"
+            "    \"Mention Docker Swarm or container orchestration in your projects section.\"\n"
+            "  ]\n"
+            "}\n"
+            "Do not include any explanation or markdown formatting (like ```json). Return pure JSON."
+        )
+        
+        response = await llm.ainvoke(prompt)
+        parsed = parse_json_response(response.content)
+        
+        score = parsed.get("suitability_score", 0)
+        analysis_json = json.dumps(parsed)
+        
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE jobs 
+            SET suitability_score = ?, match_analysis = ? 
+            WHERE job_id = ?
+        """, (score, analysis_json, job_id))
+        conn.commit()
+        conn.close()
+        
+        return {"status": "success", "suitability_score": score, "match_analysis": parsed}
+    except Exception as e:
+        logger.error(f"Error matching job: {e}")
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/jobs/{job_id}/tailor")
+async def tailor_job(job_id: str, req: TailorRequest):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,))
+        job_row = cursor.fetchone()
+        if not job_row:
+            conn.close()
+            return {"status": "error", "message": "Job not found"}
+        job = dict(job_row)
+        
+        cursor.execute("SELECT * FROM user_profile")
+        profile_rows = cursor.fetchall()
+        conn.close()
+        
+        profile_text = ""
+        for p in profile_rows:
+            p_dict = dict(p)
+            profile_text += f"[{p_dict['section'].upper()}] {p_dict['title']} | {p_dict['subtitle']} ({p_dict['date_range']})\nDescription: {p_dict['description']}\n\n"
+            
+        if req.llm_provider == "gemini":
+            llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=req.api_key)
+        elif req.llm_provider == "openai":
+            llm = ChatOpenAI(model="gpt-4o-mini", api_key=req.api_key)
+        else:
+            return {"status": "error", "message": "Invalid LLM provider"}
+            
+        prompt = (
+            "You are a professional resume writer and career coach.\n"
+            "Given the candidate's Master Profile and the Job Description, generate:\n"
+            "1. A tailored version of the candidate's CV/resume in professional Markdown format, highlighting/emphasizing the specific skills and projects that match the job description.\n"
+            "2. A professional, highly tailored cover letter utilizing standard copywriting frameworks (e.g. AIDA format) referencing specific requirements from the job description and connecting them to the candidate's profile.\n\n"
+            "--- USER MASTER PROFILE ---\n"
+            f"{profile_text}\n\n"
+            "--- JOB DESCRIPTION ---\n"
+            f"Title: {job['title']}\n"
+            f"Company: {job['company']}\n"
+            f"Description: {job['description']}\n\n"
+            "Return ONLY a valid JSON object matching this schema:\n"
+            "{\n"
+            "  \"tailored_resume_markdown\": \"# Full Name\\n\\nProfessional Markdown CV...\",\n"
+            "  \"cover_letter_text\": \"Dear Hiring Manager,\\n\\nI am writing to express my interest...\"\n"
+            "}\n"
+            "Do not include any explanation or markdown formatting (like ```json). Return pure JSON."
+        )
+        
+        response = await llm.ainvoke(prompt)
+        parsed = parse_json_response(response.content)
+        
+        return {
+            "status": "success",
+            "tailored_resume_markdown": parsed.get("tailored_resume_markdown", ""),
+            "cover_letter_text": parsed.get("cover_letter_text", "")
+        }
+    except Exception as e:
+        logger.error(f"Error tailoring job: {e}")
+        return {"status": "error", "message": str(e)}
+
 
 # WebSocket route
 @app.websocket("/ws")
