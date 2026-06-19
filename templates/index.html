@@ -858,6 +858,236 @@
                 height: 600px;
             }
         }
+
+        .filter-group-container {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 6px;
+        }
+
+        .filter-toggle-links {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .filter-toggle-links a {
+            color: #818cf8;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .filter-toggle-links a:hover {
+            color: #a5b4fc;
+            text-decoration: underline;
+        }
+
+        .filter-checkbox-list {
+            max-height: 110px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .filter-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-main);
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s ease;
+        }
+        .filter-checkbox-item:hover {
+            opacity: 0.85;
+        }
+
+        .filter-checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: var(--primary);
+            width: 14px;
+            height: 14px;
+        }
+        
+        .filter-checkbox-item span {
+            word-break: break-all;
+            line-height: 1.2;
+        }
+
+        /* Profile and Match UI styling */
+        .profile-section-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        .profile-section-card:hover {
+            border-color: rgba(89, 101, 243, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .profile-item-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        .profile-item-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .profile-item-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 6px;
+        }
+        .profile-action-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .profile-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        .profile-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+        
+        .skill-tag {
+            background: rgba(89, 101, 243, 0.15);
+            border: 1px solid rgba(89, 101, 243, 0.3);
+            color: #c7d2fe;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .missing-skill-tag {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        /* Modal Tabs */
+        .modal-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 20px;
+            font-family: var(--font-outfit);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .modal-tab-btn.active {
+            color: var(--text-main);
+        }
+        .modal-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+        }
+        
+        /* Matching layout */
+        .match-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 20px;
+            height: 100%;
+        }
+        .match-score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            border: 4px solid var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .match-score-number {
+            font-family: var(--font-outfit);
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .match-score-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .tailor-tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+        .tailor-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .tailor-tab-btn.active {
+            color: white;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--glass-border);
+        }
     </style>
 </head>
 <body>
@@ -963,7 +1193,16 @@
                 <div class="glass-card jobs-section">
                     <div class="jobs-header">
                         <div class="panel-title" style="margin: 0; border: none; padding: 0;">Scraped Jobs Database</div>
-                        <input type="text" id="tableSearch" class="search-bar" placeholder="Filter jobs by title, company...">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="text" id="tableSearch" class="search-bar" placeholder="Filter jobs by title, company...">
+                            <button class="view-btn" id="openFilterModalBtn" style="padding: 8px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; height: 36px; border-radius: 8px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                </svg>
+                                <span>Filter & Sort</span>
+                                <span id="activeFilterCount" style="display: none; background: var(--primary); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 0.65rem; font-weight: bold; justify-content: center; align-items: center;">0</span>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="table-container">
@@ -1014,6 +1253,13 @@
                                         <line x1="12" y1="19" x2="20" y2="19"></line>
                                     </svg>
                                     <span>Logs</span>
+                                </button>
+                                <button class="tab-btn-horizontal" id="tabBtnProfile" title="My Master Profile">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    <span>My Profile</span>
                                 </button>
                             </div>
                         </div>
@@ -1067,6 +1313,70 @@
                             </div>
                         </div>
 
+                        <!-- Tab Content: My Profile -->
+                        <div class="tab-content" id="tabContentProfile" style="display: none; padding: 20px; overflow-y: auto; flex-direction: column; gap: 20px; height: 100%;">
+                            <!-- Resume Import Section -->
+                            <div class="glass-card" style="padding: 20px;">
+                                <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    Import Resume
+                                </h3>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Paste your raw resume/CV text here. The LLM will parse it to populate your master profile.</p>
+                                <textarea id="rawResumeText" style="width: 100%; height: 120px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); padding: 10px; font-family: var(--font-inter); font-size: 0.85rem; resize: vertical;" placeholder="Paste CV here..."></textarea>
+                                <div style="display: flex; justify-content: flex-end; margin-top: 10px; gap: 10px;">
+                                    <button class="btn btn-start" id="importResumeBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;">Parse & Import Profile</button>
+                                </div>
+                            </div>
+
+                            <!-- Master Profile Items List grouped by Section -->
+                            <div id="profileSectionsContainer" style="display: flex; flex-direction: column; gap: 20px;">
+                                <!-- Experience Section -->
+                                <div class="profile-section-card" data-section="experience">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Work Experience</h3>
+                                        <button class="view-btn" onclick="openProfileItemModal('experience')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Experience</button>
+                                    </div>
+                                    <div class="profile-items-list" id="profile-experience-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                                </div>
+
+                                <!-- Projects Section -->
+                                <div class="profile-section-card" data-section="projects">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Projects</h3>
+                                        <button class="view-btn" onclick="openProfileItemModal('projects')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Project</button>
+                                    </div>
+                                    <div class="profile-items-list" id="profile-projects-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                                </div>
+
+                                <!-- Skills Section -->
+                                <div class="profile-section-card" data-section="skills">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Skills & Core Competencies</h3>
+                                        <button class="view-btn" onclick="openProfileItemModal('skills')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Skill Category</button>
+                                    </div>
+                                    <div class="profile-items-list" id="profile-skills-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;"></div>
+                                </div>
+
+                                <!-- Education Section -->
+                                <div class="profile-section-card" data-section="education">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Education</h3>
+                                        <button class="view-btn" onclick="openProfileItemModal('education')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Education</button>
+                                    </div>
+                                    <div class="profile-items-list" id="profile-education-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                                </div>
+
+                                <!-- Certifications Section -->
+                                <div class="profile-section-card" data-section="certifications">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; color: #a5b4fc;">Certifications</h3>
+                                        <button class="view-btn" onclick="openProfileItemModal('certifications')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">+ Add Certification</button>
+                                    </div>
+                                    <div class="profile-items-list" id="profile-certifications-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     
                 </div>
@@ -1078,21 +1388,323 @@
 
     <!-- Description Modal -->
     <div id="jobModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content" style="width: 900px; max-width: 95%; height: 650px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="flex-shrink: 0;">
                 <div class="modal-title-container">
                     <h2 id="modalTitle">Software Engineer</h2>
                     <div class="modal-subtitle" id="modalSubtitle">Google - United States</div>
                 </div>
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Description content injected here -->
+            
+            <div class="modal-tabs-header" style="display: flex; border-bottom: 1px solid var(--glass-border); padding: 0 20px; flex-shrink: 0; background: rgba(0,0,0,0.1);">
+                <button class="modal-tab-btn active" id="modalTabBtnDesc">Job Description</button>
+                <button class="modal-tab-btn" id="modalTabBtnMatch">
+                    <span>Match & Tailor</span>
+                    <span id="modalMatchBadge" style="background: var(--primary); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; display: none;">0%</span>
+                </button>
             </div>
-            <div class="modal-footer">
+            
+            <div class="modal-body-container" style="flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0;">
+                <div class="modal-body" id="modalBody" style="padding: 20px; flex: 1; overflow-y: auto;">
+                    <!-- Description content injected here -->
+                </div>
+                
+                <div class="modal-body" id="modalMatchContent" style="padding: 20px; flex: 1; display: none; overflow-y: auto;">
+                    <div id="matchLoading" style="display: none; text-align: center; padding: 40px 20px;">
+                        <span class="status-dot animate-pulse" style="background: var(--primary); width: 16px; height: 16px; display: inline-block; border-radius: 50%;"></span>
+                        <p style="margin-top: 10px; color: var(--text-muted); font-size: 0.9rem;">Analyzing CV Match and identifying gaps via LLM...</p>
+                    </div>
+                    
+                    <div id="matchNotRun" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; gap: 15px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); opacity: 0.8;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <div>
+                            <h3 style="font-family: var(--font-outfit); font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Check Job Suitability</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 400px; margin: 0 auto;">Compare this job description against your Master Profile to calculate your match score and identify any missing skills.</p>
+                        </div>
+                        <button class="btn btn-start" id="runMatchBtn" style="padding: 10px 20px; margin: 0; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            Run Match Analysis
+                        </button>
+                    </div>
+                    
+                    <div id="matchResults" style="display: none; flex-direction: column; gap: 20px; height: 100%;">
+                        <div class="match-layout" style="height: 100%;">
+                            <!-- Left Col: Suitability Details -->
+                            <div style="display: flex; flex-direction: column; gap: 16px; border-right: 1px solid var(--glass-border); padding-right: 20px; overflow-y: auto;">
+                                <div class="glass-card" style="padding: 15px; text-align: center; background: rgba(255,255,255,0.01);">
+                                    <div class="match-score-circle" id="matchScoreCircle">
+                                        <span class="match-score-number" id="matchScoreVal">0%</span>
+                                        <span class="match-score-label">Match</span>
+                                    </div>
+                                    <span id="matchStatusLabel" style="font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; display: inline-block; background: rgba(255,255,255,0.1);">Good Fit</span>
+                                </div>
+                                
+                                <div>
+                                    <h4 style="font-family: var(--font-outfit); font-size: 0.9rem; font-weight: 700; color: var(--success); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        Matched Strengths
+                                    </h4>
+                                    <div id="matchedSkillsList" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                                </div>
+                                
+                                <div>
+                                    <h4 style="font-family: var(--font-outfit); font-size: 0.9rem; font-weight: 700; color: var(--danger); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                        Missing Skills & Gaps
+                                    </h4>
+                                    <div id="missingSkillsList" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                                </div>
+                                
+                                <div>
+                                    <h4 style="font-family: var(--font-outfit); font-size: 0.9rem; font-weight: 700; color: var(--warning); margin-bottom: 8px;">Quick Tips</h4>
+                                    <ul id="matchTipsList" style="padding-left: 15px; font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;"></ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Col: Cover Letter & Tailored Resume Suggestions -->
+                            <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden;">
+                                <div class="tailor-tab-container">
+                                    <button class="tailor-tab-btn active" id="tailorTabBtnCover">Cover Letter</button>
+                                    <button class="tailor-tab-btn" id="tailorTabBtnResume">Tailored Resume</button>
+                                </div>
+                                
+                                <div id="tailorLoading" style="display: none; text-align: center; padding: 40px 10px;">
+                                    <span class="status-dot animate-pulse" style="background: var(--primary); width: 12px; height: 12px; display: inline-block; border-radius: 50%;"></span>
+                                    <p style="margin-top: 10px; color: var(--text-muted); font-size: 0.8rem;">Drafting cover letter & tailored CV adjustments via LLM...</p>
+                                </div>
+                                
+                                <div id="tailorBtnSection" style="text-align: center; padding: 30px 10px;">
+                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Generate a customized cover letter and resume markdown edits tailored to this job.</p>
+                                    <button class="btn btn-start" id="generateTailoredBtn" style="padding: 8px 16px; margin: 0; font-size: 0.8rem;">Generate Cover Letter & Tailored CV</button>
+                                </div>
+                                
+                                <!-- Cover Letter text area -->
+                                <div id="tailorCoverContent" style="display: none; flex-direction: column; flex: 1; min-height: 0; gap: 8px; overflow: hidden;">
+                                    <textarea id="tailoredCoverLetter" style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); padding: 12px; font-family: var(--font-inter); font-size: 0.85rem; line-height: 1.4; resize: none; overflow-y: auto;" readonly></textarea>
+                                    <div style="display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+                                        <button class="view-btn" id="copyCoverBtn" style="padding: 6px 12px; font-size: 0.8rem;">Copy Cover Letter</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tailored Resume adjustments -->
+                                <div id="tailorResumeContent" style="display: none; flex-direction: column; flex: 1; min-height: 0; gap: 8px; overflow: hidden;">
+                                    <textarea id="tailoredResumeMarkdown" style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); padding: 12px; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.4; resize: none; overflow-y: auto;" readonly></textarea>
+                                    <div style="display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+                                        <button class="view-btn" id="copyResumeBtn" style="padding: 6px 12px; font-size: 0.8rem;">Copy CV Markdown</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer" style="flex-shrink: 0; background: rgba(0,0,0,0.1);">
                 <span id="modalMeta" style="margin-right: auto; align-self: center; font-size: 0.8rem; color: var(--text-muted);"></span>
                 <button class="btn btn-pause" id="closeModalBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;">Close</button>
                 <a href="#" target="_blank" class="modal-link" id="modalLink">View on LinkedIn</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Item Add/Edit Modal -->
+    <div id="profileItemModal" class="modal-overlay" style="display: none; z-index: 1100;">
+        <div class="modal-content" style="width: 500px; max-width: 90%;">
+            <div class="modal-header">
+                <div class="modal-title-container">
+                    <h2 id="profileModalTitle">Add Profile Item</h2>
+                    <div class="modal-subtitle" id="profileModalSubtitle">Fill out details for your profile section</div>
+                </div>
+                <button class="close-modal" id="closeProfileModal" onclick="closeProfileItemModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+                <input type="hidden" id="profileItemId">
+                <input type="hidden" id="profileItemSection">
+                
+                <div class="form-group">
+                    <label for="profileItemTitle" id="labelProfileTitle">Title</label>
+                    <input type="text" id="profileItemTitle" placeholder="e.g. Lead Software Engineer">
+                </div>
+                <div class="form-group">
+                    <label for="profileItemSubtitle" id="labelProfileSubtitle">Subtitle / Organization</label>
+                    <input type="text" id="profileItemSubtitle" placeholder="e.g. Google Inc.">
+                </div>
+                <div class="form-group">
+                    <label for="profileItemDate" id="labelProfileDate">Date / Range</label>
+                    <input type="text" id="profileItemDate" placeholder="e.g. 2021 - Present">
+                </div>
+                <div class="form-group">
+                    <label for="profileItemDesc" id="labelProfileDesc">Description / Bullets</label>
+                    <textarea id="profileItemDesc" style="width: 100%; height: 100px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); padding: 10px; font-family: var(--font-inter); font-size: 0.85rem;" placeholder="Detail your accomplishments..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-pause" onclick="closeProfileItemModal()" style="padding: 8px 16px; margin: 0; font-size: 0.85rem; background: transparent; border: 1px solid var(--glass-border);">Cancel</button>
+                <button class="btn btn-start" id="saveProfileItemBtn" onclick="saveProfileItem()" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Sort Modal -->
+    <div id="filterModal" class="modal-overlay">
+        <div class="modal-content" style="width: 850px; max-width: 95%; height: 600px; max-height: 90vh;">
+            <div class="modal-header">
+                <div class="modal-title-container">
+                    <h2 style="font-family: var(--font-outfit); font-size: 1.3rem; color: #ffffff; margin-bottom: 4px;">Advanced Filters & Sorting</h2>
+                    <div class="modal-subtitle">Refine the scraped jobs database by specific fields and order criteria</div>
+                </div>
+                <button class="close-modal" id="closeFilterModal">&times;</button>
+            </div>
+            
+            <div class="modal-body" style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 20px; overflow: hidden; padding: 20px; height: 100%;">
+                
+                <!-- Left: Filters Area -->
+                <div style="display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; border-right: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-family: var(--font-outfit); font-size: 1rem; color: #ffffff;">Filter by Attributes</h3>
+                        <button class="view-btn" id="btnResetFilters" style="padding: 2px 8px; font-size: 0.7rem;">Reset All Filters</button>
+                    </div>
+                    
+                    <!-- Filter Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 15px;">
+                        
+                        <!-- Title Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Job Title</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-title', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-title', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-title">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                        <!-- Company Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Company</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-company', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-company', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-company">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                        <!-- Location Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Location</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-location', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-location', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-location">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                        <!-- Work Mode Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Work Mode</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-workmode', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-workmode', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-workmode">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                        <!-- Salary Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Salary</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-salary', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-salary', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-salary">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                        <!-- Employment Type Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Employment Type</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-employment', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-employment', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-employment">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                        <!-- Date Posted Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Date Posted</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-dateposted', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-dateposted', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-dateposted">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                        <!-- Scraped Date Filter -->
+                        <div class="filter-group-container">
+                            <div class="filter-group-header">
+                                <span>Scraped Date</span>
+                                <span class="filter-toggle-links"><a href="#" onclick="toggleSelectGroup('filter-scrapedat', true, event)">All</a> | <a href="#" onclick="toggleSelectGroup('filter-scrapedat', false, event)">None</a></span>
+                            </div>
+                            <div class="filter-checkbox-list" id="filter-scrapedat">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <!-- Right: Sorting Area -->
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <h3 style="font-family: var(--font-outfit); font-size: 1rem; color: #ffffff;">Sorting Criteria</h3>
+                    
+                    <!-- Sort Selection -->
+                    <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Sort By</label>
+                        <select id="sortField" style="width: 100%; background: #0c0d14; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; color: #ffffff; font-size: 0.85rem; cursor: pointer; outline: none; margin-top: 4px;">
+                            <option value="none">None (Scraped Date Descending)</option>
+                            <option value="company_asc">Company (A to Z)</option>
+                            <option value="company_desc">Company (Z to A)</option>
+                            <option value="salary_desc">Salary range (Highest First)</option>
+                            <option value="salary_asc">Salary range (Lowest First)</option>
+                            <option value="location_pref">Location (Preferred First)</option>
+                            <option value="date_desc">Date Posted (Newest First)</option>
+                            <option value="date_asc">Date Posted (Oldest First)</option>
+                        </select>
+                    </div>
+
+                    <!-- Preferred Location Setting -->
+                    <div id="preferredLocationContainer" style="display: none; flex-direction: column; gap: 6px; background: rgba(89, 101, 243, 0.05); border: 1px solid rgba(89, 101, 243, 0.2); padding: 15px; border-radius: 10px; transition: all 0.3s ease;">
+                        <label style="font-size: 0.8rem; color: #a5b4fc; font-weight: 600;">Preferred Location Name</label>
+                        <input type="text" id="preferredLocationInput" class="search-bar" style="width: 100%; margin-top: 4px;" placeholder="e.g. Bengaluru, London, Remote">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.3;">Jobs matching this location will be floated to the top, followed by other matched locations.</span>
+                    </div>
+
+                    <div style="flex: 1;"></div>
+                    
+                    <div style="background: rgba(0,0,0,0.15); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span>Total database jobs:</span>
+                            <strong id="filter-total-jobs" style="color: #ffffff;">0</strong>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                            <span>Filtered jobs:</span>
+                            <strong id="filter-matched-jobs" style="color: var(--success);">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-pause" id="closeFilterModalBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">Cancel</button>
+                <button class="btn btn-start" id="applyFiltersBtn" style="padding: 8px 24px; margin: 0; font-size: 0.85rem;">Apply Filters & Sort</button>
             </div>
         </div>
     </div>
@@ -1106,6 +1718,32 @@
         let allJobs = [];
         let isSpotlight = false;
         let hasAutoMaximized = false;
+
+        // Advanced Filter & Sort variables
+        let activeFilters = {
+            title: [],
+            company: [],
+            location: [],
+            work_mode: [],
+            salary: [],
+            employment_type: [],
+            date_posted: [],
+            scraped_date: []
+        };
+        let activeSort = {
+            field: 'none',
+            preferredLocation: ''
+        };
+        let uniqueFilterValues = {
+            title: [],
+            company: [],
+            location: [],
+            work_mode: [],
+            salary: [],
+            employment_type: [],
+            date_posted: [],
+            scraped_date: []
+        };
 
         // DOM elements
         const scraperModeInput = document.getElementById('scraperMode');
@@ -1318,12 +1956,307 @@
             elem.scrollTop = elem.scrollHeight;
         }
 
+        // Helper to parse salary text to numeric value for sorting
+        function parseSalaryValue(str) {
+            if (!str) return 0;
+            const s = String(str).toLowerCase().trim();
+            if (s.includes('not specified') || s.includes('unknown')) return 0;
+            const matches = s.replace(/,/g, '').match(/\d+/g);
+            if (!matches) return 0;
+            let val = parseFloat(matches[0]);
+            // If it contains hourly indicators, calculate annual value (assuming 2000hr/year)
+            if (s.includes('/hr') || s.includes('hour')) {
+                val = val * 2000;
+            }
+            // If contains 'k', multiply by 1000
+            if (s.includes('k') && val < 1000) {
+                val = val * 1000;
+            }
+            return val;
+        }
+
+        // Helper to parse Date Posted string to days ago for sorting
+        function parseDatePostedValue(str) {
+            if (!str) return 99999;
+            const s = String(str).toLowerCase().trim();
+            if (s.includes('active') || s.includes('reviewing') || s.includes('promoted')) {
+                return 99999;
+            }
+            const match = s.match(/(\d+)\s+(hour|day|week|month|year|minute)/);
+            if (!match) {
+                if (s.includes('yesterday')) return 1;
+                if (s.includes('today') || s.includes('hour') || s.includes('minute') || s.includes('now')) return 0;
+                return 99999;
+            }
+            const val = parseInt(match[1]);
+            const unit = match[2];
+            if (unit.includes('minute') || unit.includes('hour')) {
+                return val / 24;
+            } else if (unit.includes('day')) {
+                return val;
+            } else if (unit.includes('week')) {
+                return val * 7;
+            } else if (unit.includes('month')) {
+                return val * 30;
+            } else if (unit.includes('year')) {
+                return val * 365;
+            }
+            return 99999;
+        }
+
+        // Extract unique values from database records
+        function extractUniqueValues() {
+            const fields = {
+                title: new Set(),
+                company: new Set(),
+                location: new Set(),
+                work_mode: new Set(),
+                salary: new Set(),
+                employment_type: new Set(),
+                date_posted: new Set(),
+                scraped_date: new Set()
+            };
+            
+            allJobs.forEach(job => {
+                fields.title.add(job.title || 'Unknown Title');
+                fields.company.add(job.company || 'Unknown Company');
+                fields.location.add(job.location || 'Unknown Location');
+                fields.work_mode.add(job.work_mode || 'Not Specified');
+                fields.salary.add(job.salary || 'Not Specified');
+                fields.employment_type.add(job.employment_type || 'Not Specified');
+                fields.date_posted.add(job.date_posted || 'Unknown');
+                fields.scraped_date.add(job.scraped_at ? job.scraped_at.split('T')[0] : 'Unknown');
+            });
+            
+            // Convert sets to sorted arrays
+            for (const key in fields) {
+                const sortedVals = Array.from(fields[key]).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+                
+                // On first load or empty filter list, check everything by default
+                if (activeFilters[key].length === 0) {
+                    activeFilters[key] = [...sortedVals];
+                } else {
+                    // For newly scraped items, auto-enable/check them
+                    sortedVals.forEach(v => {
+                        if (!uniqueFilterValues[key].includes(v)) {
+                            activeFilters[key].push(v);
+                        }
+                    });
+                }
+                
+                uniqueFilterValues[key] = sortedVals;
+            }
+        }
+
+        // Populate checkboxes dynamically
+        function populateFilterCheckboxes() {
+            const mappings = [
+                { id: 'filter-title', key: 'title' },
+                { id: 'filter-company', key: 'company' },
+                { id: 'filter-location', key: 'location' },
+                { id: 'filter-workmode', key: 'work_mode' },
+                { id: 'filter-salary', key: 'salary' },
+                { id: 'filter-employment', key: 'employment_type' },
+                { id: 'filter-dateposted', key: 'date_posted' },
+                { id: 'filter-scrapedat', key: 'scraped_date' }
+            ];
+            
+            mappings.forEach(m => {
+                const container = document.getElementById(m.id);
+                if (!container) return;
+                
+                container.innerHTML = "";
+                
+                const vals = uniqueFilterValues[m.key];
+                vals.forEach(val => {
+                    const label = document.createElement('label');
+                    label.className = 'filter-checkbox-item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = val;
+                    checkbox.checked = activeFilters[m.key].includes(val);
+                    
+                    const span = document.createElement('span');
+                    span.textContent = val;
+                    
+                    label.appendChild(checkbox);
+                    label.appendChild(span);
+                    container.appendChild(label);
+                });
+            });
+        }
+
+        // Apply filters & sort algorithm
+        function applyFiltersAndSort() {
+            // Read checkboxes from modal UI
+            const mappings = [
+                { id: 'filter-title', key: 'title' },
+                { id: 'filter-company', key: 'company' },
+                { id: 'filter-location', key: 'location' },
+                { id: 'filter-workmode', key: 'work_mode' },
+                { id: 'filter-salary', key: 'salary' },
+                { id: 'filter-employment', key: 'employment_type' },
+                { id: 'filter-dateposted', key: 'date_posted' },
+                { id: 'filter-scrapedat', key: 'scraped_date' }
+            ];
+            
+            let filterCategoryCount = 0;
+            
+            mappings.forEach(m => {
+                const container = document.getElementById(m.id);
+                if (!container) return;
+                
+                const checked = [];
+                const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                const checkedBoxes = container.querySelectorAll('input[type="checkbox"]:checked');
+                
+                checkedBoxes.forEach(cb => {
+                    checked.push(cb.value);
+                });
+                
+                activeFilters[m.key] = checked;
+                
+                // Category is active if not all boxes are checked
+                if (checkedBoxes.length < checkboxes.length) {
+                    filterCategoryCount++;
+                }
+            });
+            
+            // Read sort settings
+            activeSort.field = document.getElementById('sortField').value;
+            activeSort.preferredLocation = document.getElementById('preferredLocationInput').value.trim();
+            
+            // Filter global allJobs
+            let filtered = allJobs.filter(job => {
+                const jobTitle = job.title || 'Unknown Title';
+                if (activeFilters.title.length < uniqueFilterValues.title.length) {
+                    if (!activeFilters.title.includes(jobTitle)) return false;
+                }
+                
+                const jobCompany = job.company || 'Unknown Company';
+                if (activeFilters.company.length < uniqueFilterValues.company.length) {
+                    if (!activeFilters.company.includes(jobCompany)) return false;
+                }
+                
+                const jobLoc = job.location || 'Unknown Location';
+                if (activeFilters.location.length < uniqueFilterValues.location.length) {
+                    if (!activeFilters.location.includes(jobLoc)) return false;
+                }
+                
+                const jobWM = job.work_mode || 'Not Specified';
+                if (activeFilters.work_mode.length < uniqueFilterValues.work_mode.length) {
+                    if (!activeFilters.work_mode.includes(jobWM)) return false;
+                }
+                
+                const jobSal = job.salary || 'Not Specified';
+                if (activeFilters.salary.length < uniqueFilterValues.salary.length) {
+                    if (!activeFilters.salary.includes(jobSal)) return false;
+                }
+                
+                const jobEmp = job.employment_type || 'Not Specified';
+                if (activeFilters.employment_type.length < uniqueFilterValues.employment_type.length) {
+                    if (!activeFilters.employment_type.includes(jobEmp)) return false;
+                }
+                
+                const jobDP = job.date_posted || 'Unknown';
+                if (activeFilters.date_posted.length < uniqueFilterValues.date_posted.length) {
+                    if (!activeFilters.date_posted.includes(jobDP)) return false;
+                }
+                
+                const jobSD = job.scraped_at ? job.scraped_at.split('T')[0] : 'Unknown';
+                if (activeFilters.scraped_date.length < uniqueFilterValues.scraped_date.length) {
+                    if (!activeFilters.scraped_date.includes(jobSD)) return false;
+                }
+                
+                return true;
+            });
+            
+            // Apply text query filter too
+            const query = tableSearch.value.toLowerCase().trim();
+            if (query) {
+                filtered = filtered.filter(j => 
+                    (j.title && j.title.toLowerCase().includes(query)) || 
+                    (j.company && j.company.toLowerCase().includes(query)) || 
+                    (j.location && j.location.toLowerCase().includes(query))
+                );
+            }
+            
+            // Update modal stats
+            const matchedEl = document.getElementById('filter-matched-jobs');
+            if (matchedEl) matchedEl.textContent = filtered.length;
+            
+            // Sort list
+            if (activeSort.field !== 'none') {
+                filtered.sort((a, b) => {
+                    if (activeSort.field === 'company_asc') {
+                        return (a.company || '').localeCompare(b.company || '');
+                    }
+                    else if (activeSort.field === 'company_desc') {
+                        return (b.company || '').localeCompare(a.company || '');
+                    }
+                    else if (activeSort.field === 'salary_desc') {
+                        return parseSalaryValue(b.salary) - parseSalaryValue(a.salary);
+                    }
+                    else if (activeSort.field === 'salary_asc') {
+                        return parseSalaryValue(a.salary) - parseSalaryValue(b.salary);
+                    }
+                    else if (activeSort.field === 'location_pref') {
+                        const pref = activeSort.preferredLocation.toLowerCase();
+                        if (pref) {
+                            const la = (a.location || '').toLowerCase().includes(pref);
+                            const lb = (b.location || '').toLowerCase().includes(pref);
+                            if (la && !lb) return -1;
+                            if (!la && lb) return 1;
+                        }
+                        return (a.location || '').localeCompare(b.location || '');
+                    }
+                    else if (activeSort.field === 'date_desc') {
+                        return parseDatePostedValue(a.date_posted) - parseDatePostedValue(b.date_posted);
+                    }
+                    else if (activeSort.field === 'date_asc') {
+                        return parseDatePostedValue(b.date_posted) - parseDatePostedValue(a.date_posted);
+                    }
+                    return 0;
+                });
+            }
+            
+            // Update filter count badge on main panel button
+            const activeFilterCount = document.getElementById('activeFilterCount');
+            const totalCount = filterCategoryCount + (activeSort.field !== 'none' ? 1 : 0);
+            if (totalCount > 0) {
+                activeFilterCount.style.display = 'flex';
+                activeFilterCount.textContent = totalCount;
+            } else {
+                activeFilterCount.style.display = 'none';
+            }
+            
+            renderJobs(filtered);
+        }
+
+        // Dynamic toggle select/deselect group helper
+        window.toggleSelectGroup = function(groupId, selectAll, event) {
+            if (event) event.preventDefault();
+            const container = document.getElementById(groupId);
+            if (!container) return;
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = selectAll;
+            });
+            applyFiltersAndSort();
+        };
+
         // Fetch jobs from DB
         async function fetchJobs() {
             try {
                 const res = await fetch("/api/jobs");
                 allJobs = await res.json();
-                renderJobs(allJobs);
+                
+                const totalJobsEl = document.getElementById('filter-total-jobs');
+                if (totalJobsEl) totalJobsEl.textContent = allJobs.length;
+                
+                extractUniqueValues();
+                populateFilterCheckboxes();
+                applyFiltersAndSort();
             } catch (err) {
                 console.error("Failed to fetch jobs:", err);
             }
@@ -1358,8 +2291,19 @@
                     }
                 }
                 
+                let scoreBadge = '';
+                if (job.suitability_score !== null && job.suitability_score !== undefined) {
+                    let style = 'background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);';
+                    if (job.suitability_score < 50) {
+                        style = 'background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);';
+                    } else if (job.suitability_score < 80) {
+                        style = 'background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);';
+                    }
+                    scoreBadge = `<span class="badge" style="margin-left: 6px; font-size: 0.7rem; font-weight: bold; ${style}">${job.suitability_score}% Match</span>`;
+                }
+                
                 tr.innerHTML = `
-                    <td style="font-weight: 500; color: #ffffff;">${escapeHTML(job.title)}</td>
+                    <td style="font-weight: 500; color: #ffffff;">${escapeHTML(job.title)}${scoreBadge}</td>
                     <td>${escapeHTML(job.company)}</td>
                     <td>${escapeHTML(job.location)}</td>
                     <td>${workModeHtml}</td>
@@ -1383,6 +2327,8 @@
             const job = allJobs.find(j => j.job_id === jobId);
             if (!job) return;
             
+            activeJobForMatch = job;
+            
             modalTitle.textContent = job.title;
             modalSubtitle.textContent = `${job.company} — ${job.location}`;
             modalBody.textContent = job.description;
@@ -1393,6 +2339,18 @@
             modalMeta.textContent = `${salaryText} | ${empText} | ${modeText} | Scraped: ${new Date(job.scraped_at).toLocaleDateString()}`;
             
             modalLink.href = job.url;
+            
+            // Set match badge if match exists
+            const matchBadge = document.getElementById('modalMatchBadge');
+            if (job.suitability_score !== null && job.suitability_score !== undefined) {
+                matchBadge.style.display = 'inline-block';
+                matchBadge.textContent = `${job.suitability_score}%`;
+            } else {
+                matchBadge.style.display = 'none';
+            }
+            
+            // Reset modal tabs to job description
+            switchModalTab('desc');
             
             jobModal.style.display = 'flex';
             setTimeout(() => {
@@ -1417,15 +2375,85 @@
             });
         });
 
-        // Filter Table
+        // Filter Table (text input trigger)
         tableSearch.addEventListener('input', () => {
-            const q = tableSearch.value.toLowerCase();
-            const filtered = allJobs.filter(j => 
-                j.title.toLowerCase().includes(q) || 
-                j.company.toLowerCase().includes(q) || 
-                j.location.toLowerCase().includes(q)
-            );
-            renderJobs(filtered);
+            applyFiltersAndSort();
+        });
+
+        // Filter & Sort Modal triggers
+        const filterModal = document.getElementById('filterModal');
+        const openFilterModalBtn = document.getElementById('openFilterModalBtn');
+        const closeFilterModalBtn = document.getElementById('closeFilterModalBtn');
+        const closeFilterModal = document.getElementById('closeFilterModal');
+        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+        const btnResetFilters = document.getElementById('btnResetFilters');
+        const sortFieldSelect = document.getElementById('sortField');
+
+        function showFilterModal() {
+            filterModal.style.display = 'flex';
+            setTimeout(() => {
+                filterModal.style.opacity = '1';
+                filterModal.querySelector('.modal-content').style.transform = 'scale(1)';
+            }, 50);
+            applyFiltersAndSort();
+        }
+
+        function hideFilterModal() {
+            filterModal.style.opacity = '0';
+            filterModal.querySelector('.modal-content').style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                filterModal.style.display = 'none';
+            }, 300);
+        }
+
+        openFilterModalBtn.addEventListener('click', showFilterModal);
+        
+        [closeFilterModal, closeFilterModalBtn, filterModal].forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (e.target === el || el === closeFilterModal || el === closeFilterModalBtn) {
+                    hideFilterModal();
+                }
+            });
+        });
+
+        // Toggle preferred location container display on sort select
+        sortFieldSelect.addEventListener('change', (e) => {
+            const container = document.getElementById('preferredLocationContainer');
+            if (e.target.value === 'location_pref') {
+                container.style.display = 'flex';
+                document.getElementById('preferredLocationInput').focus();
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Reset all filters event
+        btnResetFilters.addEventListener('click', () => {
+            const groups = [
+                'filter-title', 'filter-company', 'filter-location', 
+                'filter-workmode', 'filter-salary', 'filter-employment', 
+                'filter-dateposted', 'filter-scrapedat'
+            ];
+            groups.forEach(g => {
+                const container = document.getElementById(g);
+                if (container) {
+                    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        cb.checked = true;
+                    });
+                }
+            });
+            
+            sortFieldSelect.value = 'none';
+            document.getElementById('preferredLocationInput').value = '';
+            document.getElementById('preferredLocationContainer').style.display = 'none';
+            
+            applyFiltersAndSort();
+        });
+
+        // Apply filters button inside modal
+        applyFiltersBtn.addEventListener('click', () => {
+            applyFiltersAndSort();
+            hideFilterModal();
         });
 
         // Trigger action controls
@@ -1531,25 +2559,505 @@
         // Tab switching logic
         const tabBtnBrowser = document.getElementById('tabBtnBrowser');
         const tabBtnLogs = document.getElementById('tabBtnLogs');
+        const tabBtnProfile = document.getElementById('tabBtnProfile');
         const tabContentBrowser = document.getElementById('tabContentBrowser');
         const tabContentLogs = document.getElementById('tabContentLogs');
+        const tabContentProfile = document.getElementById('tabContentProfile');
 
         function switchTab(tabName) {
+            tabBtnBrowser.classList.remove('active');
+            tabBtnLogs.classList.remove('active');
+            tabBtnProfile.classList.remove('active');
+            tabContentBrowser.classList.remove('active');
+            tabContentLogs.classList.remove('active');
+            tabContentProfile.classList.remove('active');
+
             if (tabName === 'browser') {
                 tabBtnBrowser.classList.add('active');
-                tabBtnLogs.classList.remove('active');
                 tabContentBrowser.classList.add('active');
-                tabContentLogs.classList.remove('active');
             } else if (tabName === 'logs') {
                 tabBtnLogs.classList.add('active');
-                tabBtnBrowser.classList.remove('active');
                 tabContentLogs.classList.add('active');
-                tabContentBrowser.classList.remove('active');
+            } else if (tabName === 'profile') {
+                tabBtnProfile.classList.add('active');
+                tabContentProfile.classList.add('active');
+                fetchProfile();
             }
         }
 
         tabBtnBrowser.addEventListener('click', () => switchTab('browser'));
         tabBtnLogs.addEventListener('click', () => switchTab('logs'));
+        tabBtnProfile.addEventListener('click', () => switchTab('profile'));
+
+        // Profile Management state
+        let currentProfile = {};
+
+        // Fetch user profile from DB
+        async function fetchProfile() {
+            try {
+                const res = await fetch('/api/profile');
+                currentProfile = await res.json();
+                renderProfile();
+            } catch (err) {
+                console.error("Failed to fetch profile:", err);
+            }
+        }
+
+        // Render profile elements in lists
+        function renderProfile() {
+            const sections = ['experience', 'projects', 'skills', 'education', 'certifications'];
+            
+            sections.forEach(sec => {
+                const listEl = document.getElementById(`profile-${sec}-list`);
+                if (!listEl) return;
+                listEl.innerHTML = '';
+                
+                const items = currentProfile[sec] || [];
+                if (items.length === 0) {
+                    listEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 10px;">No items added yet. Click Add to populate.</div>`;
+                    return;
+                }
+                
+                items.forEach(item => {
+                    if (sec === 'skills') {
+                        const card = document.createElement('div');
+                        card.className = 'profile-item-card';
+                        card.innerHTML = `
+                            <div style="font-weight: 600; color: #a5b4fc; font-size: 0.85rem;">${escapeHTML(item.title)}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(item.subtitle || '')}</div>
+                            <div class="profile-item-actions">
+                                <button class="profile-action-btn" onclick="editProfileItem(${item.id}, 'skills')" title="Edit">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <button class="profile-action-btn delete" onclick="deleteProfileItem(${item.id})" title="Delete">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        `;
+                        listEl.appendChild(card);
+                    } else {
+                        const card = document.createElement('div');
+                        card.className = 'profile-item-card';
+                        card.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-right: 60px;">
+                                <div>
+                                    <div style="font-weight: 700; color: #ffffff; font-size: 0.9rem;">${escapeHTML(item.title)}</div>
+                                    <div style="font-size: 0.85rem; color: #a5b4fc; font-weight: 500;">${escapeHTML(item.subtitle || '')}</div>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">${escapeHTML(item.date_range || '')}</div>
+                            </div>
+                            ${item.description ? `<div style="font-size: 0.8rem; color: var(--text-muted); white-space: pre-wrap; margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 6px;">${escapeHTML(item.description)}</div>` : ''}
+                            <div class="profile-item-actions">
+                                <button class="profile-action-btn" onclick="editProfileItem(${item.id}, '${sec}')" title="Edit">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <button class="profile-action-btn delete" onclick="deleteProfileItem(${item.id})" title="Delete">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        `;
+                        listEl.appendChild(card);
+                    }
+                });
+            });
+        }
+
+        // Open Profile item Modal
+        window.openProfileItemModal = function(section, isEdit = false) {
+            const modal = document.getElementById('profileItemModal');
+            document.getElementById('profileItemSection').value = section;
+            
+            // Adjust labels dynamically based on section
+            const labelTitle = document.getElementById('labelProfileTitle');
+            const labelSubtitle = document.getElementById('labelProfileSubtitle');
+            const labelDate = document.getElementById('labelProfileDate');
+            const labelDesc = document.getElementById('labelProfileDesc');
+            
+            document.getElementById('profileItemTitle').value = '';
+            document.getElementById('profileItemSubtitle').value = '';
+            document.getElementById('profileItemDate').value = '';
+            document.getElementById('profileItemDesc').value = '';
+            document.getElementById('profileItemId').value = '';
+            
+            if (section === 'experience') {
+                labelTitle.textContent = "Job Title";
+                labelSubtitle.textContent = "Company / Organization";
+                labelDate.textContent = "Date Range (e.g. 2021 - Present)";
+                labelDesc.textContent = "Responsibilities & Accomplishments";
+            } else if (section === 'projects') {
+                labelTitle.textContent = "Project Name";
+                labelSubtitle.textContent = "Technologies / URL";
+                labelDate.textContent = "Year / Date Completed";
+                labelDesc.textContent = "Project Details & Achievements";
+            } else if (section === 'skills') {
+                labelTitle.textContent = "Skill Category";
+                labelSubtitle.textContent = "Skills List (e.g. Python, SQL, JS)";
+                labelDate.textContent = "Experience Level (Optional)";
+                labelDesc.textContent = "Additional Context (Optional)";
+            } else if (section === 'education') {
+                labelTitle.textContent = "Degree / Program";
+                labelSubtitle.textContent = "School / Institution";
+                labelDate.textContent = "Date Range";
+                labelDesc.textContent = "Relevant Coursework or Honors";
+            } else if (section === 'certifications') {
+                labelTitle.textContent = "Certification Name";
+                labelSubtitle.textContent = "Issuing Authority";
+                labelDate.textContent = "Date Issued / Expiration";
+                labelDesc.textContent = "Credential ID or Details";
+            }
+            
+            document.getElementById('profileModalTitle').textContent = isEdit ? "Edit Profile Item" : "Add Profile Item";
+            modal.style.display = 'flex';
+        };
+
+        window.closeProfileItemModal = function() {
+            document.getElementById('profileItemModal').style.display = 'none';
+        };
+
+        // Edit Profile Item
+        window.editProfileItem = function(id, section) {
+            const items = currentProfile[section] || [];
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            
+            openProfileItemModal(section, true);
+            
+            document.getElementById('profileItemId').value = item.id;
+            document.getElementById('profileItemTitle').value = item.title;
+            document.getElementById('profileItemSubtitle').value = item.subtitle || '';
+            document.getElementById('profileItemDate').value = item.date_range || '';
+            document.getElementById('profileItemDesc').value = item.description || '';
+        };
+
+        // Save Profile Item (Add or Edit)
+        window.saveProfileItem = async function() {
+            const id = document.getElementById('profileItemId').value;
+            const section = document.getElementById('profileItemSection').value;
+            const title = document.getElementById('profileItemTitle').value.trim();
+            const subtitle = document.getElementById('profileItemSubtitle').value.trim();
+            const date_range = document.getElementById('profileItemDate').value.trim();
+            const description = document.getElementById('profileItemDesc').value.trim();
+            
+            if (!title) {
+                alert("Title is required.");
+                return;
+            }
+            
+            const payload = { section, title, subtitle, date_range, description };
+            const url = id ? `/api/profile/${id}` : '/api/profile';
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    closeProfileItemModal();
+                    fetchProfile();
+                } else {
+                    alert("Error saving item: " + data.message);
+                }
+            } catch (err) {
+                console.error("Save profile item error:", err);
+            }
+        };
+
+        // Delete Profile Item
+        window.deleteProfileItem = async function(id) {
+            if (!confirm("Are you sure you want to delete this profile item?")) return;
+            try {
+                const res = await fetch(`/api/profile/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    fetchProfile();
+                } else {
+                    alert("Error deleting item.");
+                }
+            } catch (err) {
+                console.error("Delete profile item error:", err);
+            }
+        };
+
+        // Resume Import Handler
+        const importResumeBtn = document.getElementById('importResumeBtn');
+        const rawResumeText = document.getElementById('rawResumeText');
+        
+        importResumeBtn.addEventListener('click', async () => {
+            const text = rawResumeText.value.trim();
+            const key = apiKeyInput.value.trim();
+            const provider = llmProviderInput.value;
+            
+            if (!text) {
+                alert("Please paste your resume text first.");
+                return;
+            }
+            if (!key) {
+                alert("An LLM API Key is required to parse the resume. Please fill it in the 'Advanced LLM Settings' in the left Scraper Controls panel.");
+                return;
+            }
+            
+            importResumeBtn.disabled = true;
+            importResumeBtn.textContent = "Parsing Resume...";
+            
+            try {
+                const res = await fetch('/api/profile/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, api_key: key, llm_provider: provider })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert("Resume parsed successfully!");
+                    rawResumeText.value = '';
+                    fetchProfile();
+                } else {
+                    alert("Error parsing resume: " + data.message);
+                }
+            } catch (err) {
+                console.error("Import resume error:", err);
+                alert("An unexpected error occurred during resume import.");
+            } finally {
+                importResumeBtn.disabled = false;
+                importResumeBtn.textContent = "Parse & Import Profile";
+            }
+        });
+
+        // Job Details Modal Tab Controls
+        const modalTabBtnDesc = document.getElementById('modalTabBtnDesc');
+        const modalTabBtnMatch = document.getElementById('modalTabBtnMatch');
+        const modalBody = document.getElementById('modalBody');
+        const modalMatchContent = document.getElementById('modalMatchContent');
+        
+        window.switchModalTab = function(tabName) {
+            modalTabBtnDesc.classList.remove('active');
+            modalTabBtnMatch.classList.remove('active');
+            modalBody.style.display = 'none';
+            modalMatchContent.style.display = 'none';
+            
+            if (tabName === 'desc') {
+                modalTabBtnDesc.classList.add('active');
+                modalBody.style.display = 'block';
+            } else if (tabName === 'match') {
+                modalTabBtnMatch.classList.add('active');
+                modalMatchContent.style.display = 'block';
+                showMatchTabInfo();
+            }
+        }
+        
+        modalTabBtnDesc.addEventListener('click', () => switchModalTab('desc'));
+        modalTabBtnMatch.addEventListener('click', () => switchModalTab('match'));
+        
+        // Tailor cover/resume tabs toggle
+        const tailorTabBtnCover = document.getElementById('tailorTabBtnCover');
+        const tailorTabBtnResume = document.getElementById('tailorTabBtnResume');
+        const tailorCoverContent = document.getElementById('tailorCoverContent');
+        const tailorResumeContent = document.getElementById('tailorResumeContent');
+        
+        window.switchTailorTab = function(tabName) {
+            tailorTabBtnCover.classList.remove('active');
+            tailorTabBtnResume.classList.remove('active');
+            tailorCoverContent.style.display = 'none';
+            tailorResumeContent.style.display = 'none';
+            
+            if (tabName === 'cover') {
+                tailorTabBtnCover.classList.add('active');
+                tailorCoverContent.style.display = 'flex';
+            } else if (tabName === 'resume') {
+                tailorTabBtnResume.classList.add('active');
+                tailorResumeContent.style.display = 'flex';
+            }
+        }
+        
+        tailorTabBtnCover.addEventListener('click', () => switchTailorTab('cover'));
+        tailorTabBtnResume.addEventListener('click', () => switchTailorTab('resume'));
+
+        // Display current job matching state in modal
+        let activeJobForMatch = null;
+        
+        function showMatchTabInfo() {
+            if (!activeJobForMatch) return;
+            
+            const matchNotRun = document.getElementById('matchNotRun');
+            const matchResults = document.getElementById('matchResults');
+            const matchLoading = document.getElementById('matchLoading');
+            
+            matchLoading.style.display = 'none';
+            
+            if (activeJobForMatch.suitability_score !== null && activeJobForMatch.suitability_score !== undefined) {
+                matchNotRun.style.display = 'none';
+                matchResults.style.display = 'flex';
+                
+                const val = activeJobForMatch.suitability_score;
+                document.getElementById('matchScoreVal').textContent = `${val}%`;
+                
+                const circle = document.getElementById('matchScoreCircle');
+                const badge = document.getElementById('matchStatusLabel');
+                
+                if (val >= 80) {
+                    circle.style.borderColor = 'var(--success)';
+                    circle.style.boxShadow = '0 0 15px var(--success-glow)';
+                    badge.textContent = "Strong Fit";
+                    badge.style.color = "var(--success)";
+                    badge.style.background = "rgba(16, 185, 129, 0.15)";
+                } else if (val >= 50) {
+                    circle.style.borderColor = 'var(--warning)';
+                    circle.style.boxShadow = '0 0 15px var(--warning-glow)';
+                    badge.textContent = "Moderate Fit";
+                    badge.style.color = "var(--warning)";
+                    badge.style.background = "rgba(245, 158, 11, 0.15)";
+                } else {
+                    circle.style.borderColor = 'var(--danger)';
+                    circle.style.boxShadow = '0 0 15px var(--danger-glow)';
+                    badge.textContent = "Weak Fit";
+                    badge.style.color = "var(--danger)";
+                    badge.style.background = "rgba(239, 68, 68, 0.15)";
+                }
+                
+                const analysis = activeJobForMatch.match_analysis ? JSON.parse(activeJobForMatch.match_analysis) : {};
+                
+                const matchedList = document.getElementById('matchedSkillsList');
+                matchedList.innerHTML = '';
+                (analysis.matched_skills || []).forEach(sk => {
+                    const tag = document.createElement('span');
+                    tag.className = 'skill-tag';
+                    tag.textContent = sk;
+                    matchedList.appendChild(tag);
+                });
+                if ((analysis.matched_skills || []).length === 0) {
+                    matchedList.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">None parsed.</span>';
+                }
+                
+                const missingList = document.getElementById('missingSkillsList');
+                missingList.innerHTML = '';
+                (analysis.missing_skills || []).forEach(sk => {
+                    const tag = document.createElement('span');
+                    tag.className = 'missing-skill-tag';
+                    tag.textContent = sk;
+                    missingList.appendChild(tag);
+                });
+                if ((analysis.missing_skills || []).length === 0) {
+                    missingList.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">None detected.</span>';
+                }
+                
+                const tipsList = document.getElementById('matchTipsList');
+                tipsList.innerHTML = '';
+                (analysis.tips || []).forEach(tip => {
+                    const li = document.createElement('li');
+                    li.textContent = tip;
+                    tipsList.appendChild(li);
+                });
+                if ((analysis.tips || []).length === 0) {
+                    tipsList.innerHTML = '<li style="list-style:none; color:var(--text-muted);">No recommendations needed.</li>';
+                }
+                
+                document.getElementById('tailorBtnSection').style.display = 'block';
+                document.getElementById('tailorCoverContent').style.display = 'none';
+                document.getElementById('tailorResumeContent').style.display = 'none';
+                document.getElementById('tailorLoading').style.display = 'none';
+                switchTailorTab('cover');
+                
+            } else {
+                matchNotRun.style.display = 'flex';
+                matchResults.style.display = 'none';
+            }
+        }
+        
+        // Run Match Button Handler
+        const runMatchBtn = document.getElementById('runMatchBtn');
+        runMatchBtn.addEventListener('click', async () => {
+            const key = apiKeyInput.value.trim();
+            const provider = llmProviderInput.value;
+            if (!key) {
+                alert("An LLM API Key is required to run matching. Please set it in 'Advanced LLM Settings' first.");
+                return;
+            }
+            if (!activeJobForMatch) return;
+            
+            document.getElementById('matchNotRun').style.display = 'none';
+            document.getElementById('matchLoading').style.display = 'block';
+            
+            try {
+                const res = await fetch(`/api/jobs/${activeJobForMatch.job_id}/match`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: key, llm_provider: provider })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    activeJobForMatch.suitability_score = data.suitability_score;
+                    activeJobForMatch.match_analysis = JSON.stringify(data.match_analysis);
+                    
+                    const matchBadge = document.getElementById('modalMatchBadge');
+                    matchBadge.style.display = 'inline-block';
+                    matchBadge.textContent = `${data.suitability_score}%`;
+                    
+                    showMatchTabInfo();
+                    fetchJobs();
+                } else {
+                    alert("Matchmaking error: " + data.message);
+                    showMatchTabInfo();
+                }
+            } catch (err) {
+                console.error("Match error:", err);
+                alert("An unexpected error occurred during matchmaking.");
+                showMatchTabInfo();
+            }
+        });
+        
+        // Generate Tailored Resume and Cover Letter
+        const generateTailoredBtn = document.getElementById('generateTailoredBtn');
+        generateTailoredBtn.addEventListener('click', async () => {
+            const key = apiKeyInput.value.trim();
+            const provider = llmProviderInput.value;
+            if (!key) {
+                alert("An LLM API Key is required. Please set it in settings first.");
+                return;
+            }
+            if (!activeJobForMatch) return;
+            
+            document.getElementById('tailorBtnSection').style.display = 'none';
+            document.getElementById('tailorLoading').style.display = 'block';
+            
+            try {
+                const res = await fetch(`/api/jobs/${activeJobForMatch.job_id}/tailor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: key, llm_provider: provider })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('tailoredCoverLetter').value = data.cover_letter_text;
+                    document.getElementById('tailoredResumeMarkdown').value = data.tailored_resume_markdown;
+                    
+                    document.getElementById('tailorLoading').style.display = 'none';
+                    switchTailorTab('cover');
+                } else {
+                    alert("Tailoring error: " + data.message);
+                    document.getElementById('tailorBtnSection').style.display = 'block';
+                    document.getElementById('tailorLoading').style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Tailoring error:", err);
+                alert("An unexpected error occurred during tailoring.");
+                document.getElementById('tailorBtnSection').style.display = 'block';
+                document.getElementById('tailorLoading').style.display = 'none';
+            }
+        });
+        
+        // Clipboard actions
+        document.getElementById('copyCoverBtn').addEventListener('click', () => {
+            const text = document.getElementById('tailoredCoverLetter').value;
+            navigator.clipboard.writeText(text);
+            alert("Cover letter copied to clipboard!");
+        });
+        document.getElementById('copyResumeBtn').addEventListener('click', () => {
+            const text = document.getElementById('tailoredResumeMarkdown').value;
+            navigator.clipboard.writeText(text);
+            alert("Tailored CV copied to clipboard!");
+        });
 
         // Spotlight toggle event listener
         const spotlightToggleBtn = document.getElementById('spotlightToggleBtn');
