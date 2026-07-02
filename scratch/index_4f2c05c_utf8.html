@@ -1,0 +1,1587 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindMeJobs.ai - Autonomous HITL Job Scraper</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090a0f 0%, #121420 100%);
+            --primary: #5965f3;
+            --primary-glow: rgba(89, 101, 243, 0.4);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.3);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.3);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.3);
+            --glass-bg: rgba(22, 25, 41, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.07);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --font-outfit: 'Outfit', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            font-family: var(--font-inter);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Glassmorphism utility card */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Layout structure */
+        .app-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: calc(100vh - 40px);
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-family: var(--font-outfit);
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        header h1 span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.1);
+            letter-spacing: 0.5px;
+            font-family: var(--font-inter);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        /* State color bindings */
+        .status-idle { color: var(--text-muted); }
+        .status-idle .status-dot { background-color: var(--text-muted); }
+        .status-running { color: var(--success); }
+        .status-running .status-dot { background-color: var(--success); animation: pulse 1.5s infinite; }
+        .status-paused { color: var(--warning); }
+        .status-paused .status-dot { background-color: var(--warning); animation: pulse-slow 2s infinite; }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px var(--success); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        @keyframes pulse-slow {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px var(--warning); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Main Workspace Panels */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 20px;
+            overflow: hidden;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Right Panel Container */
+        .right-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0;
+        }
+
+        /* Horizontal Tabs in Right Panel Header */
+        .right-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .right-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .right-title {
+            font-family: var(--font-outfit);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .horizontal-tabs {
+            display: flex;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 3px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn-horizontal {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn-horizontal:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn-horizontal.active {
+            color: #ffffff;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .tab-btn-horizontal svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+        }
+
+        /* Spotlight button styling */
+        .spotlight-toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .spotlight-toggle-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .spotlight-toggle-btn.active {
+            color: #ffffff;
+            background: var(--warning);
+            border-color: var(--warning);
+            box-shadow: 0 0 10px var(--warning-glow);
+        }
+
+        /* Spotlight Active Overlay State */
+        .right-column.spotlight-active {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            width: calc(100vw - 40px);
+            height: calc(100vh - 40px);
+            z-index: 999;
+            animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .right-column.spotlight-active .right-panel {
+            background: rgba(10, 11, 18, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Main Content Display Area */
+        .main-content-area {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Sidebar Control Panel */
+        .controls-panel {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .controls-layout {
+            display: flex;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .controls-left-col {
+            flex: 1.1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .controls-right-col {
+            flex: 0.9;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .panel-title {
+            font-family: var(--font-outfit);
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+            margin-bottom: 3px;
+            color: #ffffff;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .api-key-container {
+            position: relative;
+        }
+
+        .api-key-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .api-key-toggle:hover {
+            color: #ffffff;
+        }
+
+        /* Action Buttons Grid */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .btn-start {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        .btn-start:hover {
+            background: #4753e6;
+            transform: translateY(-1px);
+        }
+
+        .btn-start:disabled {
+            background: rgba(89, 101, 243, 0.3);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-pause {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+
+        .btn-pause:hover:not(:disabled) {
+            background: rgba(245, 158, 11, 0.2);
+            box-shadow: 0 0 10px var(--warning-glow);
+        }
+
+        .btn-resume {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .btn-resume:hover:not(:disabled) {
+            background: rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 10px var(--success-glow);
+        }
+
+        .btn-stop {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            background: rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 10px var(--danger-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Live Viewport Panel */
+        .live-panel {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .browser-viewport-container {
+            flex: 1;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .browser-viewport {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            cursor: crosshair;
+            transition: opacity 0.3s ease;
+        }
+
+        .viewport-placeholder {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .viewport-placeholder svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* Interactive overlay for Pause state */
+        .hitl-alert-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(245, 158, 11, 0.9);
+            color: #000000;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+            font-size: 0.85rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, -6px); }
+        }
+
+        /* Keyboard input field below viewport */
+        .hitl-input-bar {
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* Terminal Console Logs Panel */
+        .logs-panel {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .terminal {
+            flex: 1;
+            background: #05060c;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            overflow-y: auto;
+            color: #4ade80; /* matrix green */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .terminal-line {
+            line-height: 1.4;
+            white-space: pre-wrap;
+            border-left: 2px solid transparent;
+            padding-left: 6px;
+        }
+
+        .terminal-line.system {
+            color: #a5b4fc; /* purple */
+        }
+
+        .terminal-line.agent {
+            color: #38bdf8; /* light blue */
+            border-color: #0284c7;
+        }
+
+        .terminal-line.error {
+            color: #f87171; /* red */
+            border-color: #dc2626;
+        }
+
+        .terminal-line.user-hitl {
+            color: #fbbf24; /* yellow */
+            border-color: #d97706;
+        }
+
+        /* Bottom Database Table Section */
+        .jobs-section {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .jobs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-bar {
+            width: 300px;
+        }
+
+        /* Work Mode Badge Styles */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .badge-remote { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); }
+        .badge-hybrid { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.25); }
+        .badge-onsite { background: rgba(156, 163, 175, 0.15); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.25); }
+        .badge-unknown { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid rgba(255, 255, 255, 0.08); }
+
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.04);
+            color: #ffffff;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .view-btn {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Description Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background: #171926;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            width: 800px;
+            max-width: 90%;
+            height: 600px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-title-container h2 {
+            font-family: var(--font-outfit);
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: #ffffff;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: #d1d5db;
+        }
+
+        .modal-body strong {
+            color: #ffffff;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-link {
+            display: inline-block;
+            background: var(--primary);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .modal-link:hover {
+            background: #4753e6;
+        }
+
+        /* Responsive styling */
+        @media (max-width: 1200px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow: visible;
+            }
+            .app-container {
+                height: auto;
+                grid-template-rows: auto auto auto;
+            }
+            .browser-viewport-container {
+                height: 500px;
+            }
+            .terminal {
+                height: 300px;
+            }
+            .left-column {
+                height: auto;
+            }
+            .right-column {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Top bar Header -->
+        <header class="glass-card">
+            <h1>FindMeJobs.ai <span>HEADLESS AGENT</span></h1>
+            
+            <div id="statusBadge" class="status-badge status-idle">
+                <span class="status-dot"></span>
+                <span id="statusText">IDLE</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="workspace">
+            
+            <!-- Left Column: Controls & Jobs Table -->
+            <div class="left-column">
+                
+                <!-- Controls Panel -->
+                <div class="glass-card controls-panel">
+                    <div class="panel-title">Scraper Controls</div>
+                    
+                    <div class="controls-layout">
+                        <!-- Left Side: Inputs and Settings -->
+                        <div class="controls-left-col">
+                            <div class="form-group">
+                                <label for="scraperMode">Scraper Mode</label>
+                                <select id="scraperMode">
+                                    <option value="fast" selected>Fast Playwright (Free)</option>
+                                    <option value="ai">AI Agent (Requires Key)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="keywords">Job Keywords</label>
+                                <input type="text" id="keywords" value="Software Engineer" placeholder="e.g. Software Engineer">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" value="United States" placeholder="e.g. United States">
+                            </div>
+
+                            <!-- Collapsible LLM Settings -->
+                            <details class="llm-details-accordion" style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                                <summary style="cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                                    <span>ADVANCED LLM SETTINGS</span>
+                                    <span style="font-size: 0.7rem; font-weight: normal; color: var(--primary);">TOGGLE</span>
+                                </summary>
+                                <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+                                    <div class="form-group">
+                                        <label for="llmProvider">LLM Provider</label>
+                                        <select id="llmProvider">
+                                            <option value="gemini">Gemini 2.5 Flash</option>
+                                            <option value="openai">OpenAI GPT-4o-mini</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="apiKey">LLM API Key</label>
+                                        <div class="api-key-container">
+                                            <input type="password" id="apiKey" placeholder="Enter API Key">
+                                            <button class="api-key-toggle" id="apiKeyToggle" type="button">SHOW</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Right Side: Action Buttons -->
+                        <div class="controls-right-col">
+                            <label style="margin-bottom: 2px;">Execution Actions</label>
+                            
+                            <button class="btn btn-start" id="startBtn" style="width: 100%;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                Start Scraping
+                            </button>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <button class="btn btn-pause" id="pauseBtn" disabled>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                                    Pause
+                                </button>
+                                <button class="btn btn-resume" id="resumeBtn" disabled>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    Resume
+                                </button>
+                            </div>
+                            
+                            <button class="btn btn-stop" id="stopBtn" style="width: 100%;" disabled>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                                Stop Scraper
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Panel: Scraped Jobs Database -->
+                <div class="glass-card jobs-section">
+                    <div class="jobs-header">
+                        <div class="panel-title" style="margin: 0; border: none; padding: 0;">Scraped Jobs Database</div>
+                        <input type="text" id="tableSearch" class="search-bar" placeholder="Filter jobs by title, company...">
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Job Title</th>
+                                    <th>Company</th>
+                                    <th>Location</th>
+                                    <th>Work Mode</th>
+                                    <th>Salary</th>
+                                    <th>Employment Type</th>
+                                    <th>Date Posted</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobsTableBody">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading database...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Viewport & Logs -->
+            <div class="right-column" id="rightColumn">
+                <div class="right-panel">
+                    
+                    <!-- Right Header containing title, horizontal tabs, and spotlight -->
+                    <div class="right-header">
+                        <div class="right-header-left">
+                            <span class="right-title">Live Viewport</span>
+                            <div class="horizontal-tabs">
+                                <button class="tab-btn-horizontal active" id="tabBtnBrowser" title="Live Browser View">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                                    </svg>
+                                    <span>Browser</span>
+                                </button>
+                                <button class="tab-btn-horizontal" id="tabBtnLogs" title="Execution Logs">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="4 17 10 11 4 5"></polyline>
+                                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                                    </svg>
+                                    <span>Logs</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Spotlight button -->
+                        <button class="spotlight-toggle-btn" id="spotlightToggleBtn" title="Toggle Spotlight Mode">
+                            <svg id="spotlightIconMax" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                            </svg>
+                            <svg id="spotlightIconMin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                                <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
+                            </svg>
+                            <span id="spotlightToggleText">Spotlight</span>
+                        </button>
+                    </div>
+
+                    <!-- Main Workspace Content Area inside Right Column -->
+                    <div class="main-content-area" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
+                        
+                        <!-- Tab Content: Browser Viewport -->
+                        <div class="tab-content active" id="tabContentBrowser" style="gap: 12px;">
+                            <div class="browser-viewport-container">
+                                <div id="hitlAlert" class="hitl-alert-overlay" style="display: none;">
+                                    <span class="status-dot" style="background-color: var(--warning); display: inline-block;"></span>
+                                    HUMAN IN THE LOOP - WAITING FOR INPUT
+                                </div>
+                                
+                                <img id="viewportImg" class="browser-viewport" style="display: none;" alt="Live Browser Viewport">
+                                
+                                <div id="viewportPlaceholder" class="viewport-placeholder">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="20" height="15" x="2" y="3" rx="2" ry="2"></rect>
+                                        <line x1="8" x2="16" y1="21" y2="21"></line>
+                                        <line x1="12" x2="12" y1="18" y2="21"></line>
+                                    </svg>
+                                    <p>Agent is not running.<br>Configure settings and click "Start Scraping" to view execution.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- HITL Keyboard Input bar -->
+                            <div class="hitl-input-bar" style="flex-shrink: 0;">
+                                <input type="text" id="hitlInput" style="flex: 1;" placeholder="Type text to send to browser focus (e.g. solve captcha, credentials)" disabled>
+                                <button class="btn btn-start" id="hitlSendBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;" disabled>Send Text</button>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content: Logs -->
+                        <div class="tab-content" id="tabContentLogs">
+                            <div id="terminal" class="terminal" style="flex: 1; min-height: 0;">
+                                <div class="terminal-line system">Terminal initialized. Ready.</div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Description Modal -->
+    <div id="jobModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-container">
+                    <h2 id="modalTitle">Software Engineer</h2>
+                    <div class="modal-subtitle" id="modalSubtitle">Google - United States</div>
+                </div>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Description content injected here -->
+            </div>
+            <div class="modal-footer">
+                <span id="modalMeta" style="margin-right: auto; align-self: center; font-size: 0.8rem; color: var(--text-muted);"></span>
+                <button class="btn btn-pause" id="closeModalBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;">Close</button>
+                <a href="#" target="_blank" class="modal-link" id="modalLink">View on LinkedIn</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket URL resolution
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+        
+        let socket = null;
+        let allJobs = [];
+        let isSpotlight = false;
+        let hasAutoMaximized = false;
+
+        // DOM elements
+        const scraperModeInput = document.getElementById('scraperMode');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const keywordsInput = document.getElementById('keywords');
+        const locationInput = document.getElementById('location');
+        const llmProviderInput = document.getElementById('llmProvider');
+        const apiKeyInput = document.getElementById('apiKey');
+        const apiKeyToggle = document.getElementById('apiKeyToggle');
+        
+        const viewportImg = document.getElementById('viewportImg');
+        const viewportPlaceholder = document.getElementById('viewportPlaceholder');
+        const hitlAlert = document.getElementById('hitlAlert');
+        const hitlInput = document.getElementById('hitlInput');
+        const hitlSendBtn = document.getElementById('hitlSendBtn');
+        
+        const terminal = document.getElementById('terminal');
+        const jobsTableBody = document.getElementById('jobsTableBody');
+        const tableSearch = document.getElementById('tableSearch');
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+
+        // Modal elements
+        const jobModal = document.getElementById('jobModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalSubtitle = document.getElementById('modalSubtitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalMeta = document.getElementById('modalMeta');
+        const modalLink = document.getElementById('modalLink');
+        const closeModal = document.getElementById('closeModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // Load persisted credentials on load
+        if (localStorage.getItem('linkedin_keywords')) keywordsInput.value = localStorage.getItem('linkedin_keywords');
+        if (localStorage.getItem('linkedin_location')) locationInput.value = localStorage.getItem('linkedin_location');
+        if (localStorage.getItem('linkedin_llm')) llmProviderInput.value = localStorage.getItem('linkedin_llm');
+        if (localStorage.getItem('linkedin_key')) apiKeyInput.value = localStorage.getItem('linkedin_key');
+
+        // Save credentials when changed
+        [keywordsInput, locationInput, llmProviderInput, apiKeyInput].forEach(elem => {
+            elem.addEventListener('change', () => {
+                localStorage.setItem('linkedin_keywords', keywordsInput.value);
+                localStorage.setItem('linkedin_location', locationInput.value);
+                localStorage.setItem('linkedin_llm', llmProviderInput.value);
+                localStorage.setItem('linkedin_key', apiKeyInput.value);
+            });
+        });
+
+        // Password visibility toggle
+        apiKeyToggle.addEventListener('click', () => {
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                apiKeyToggle.textContent = 'HIDE';
+            } else {
+                apiKeyInput.type = 'password';
+                apiKeyToggle.textContent = 'SHOW';
+            }
+        });
+
+        // Connect to WebSocket
+        function connectWebSocket() {
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = () => {
+                appendLog("[SYSTEM] Connection established with backend API.", "system");
+            };
+
+            socket.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                
+                if (msg.type === "init") {
+                    // Load logs
+                    terminal.innerHTML = "";
+                    msg.logs.forEach(log => {
+                        const line = document.createElement('div');
+                        line.className = 'terminal-line';
+                        line.textContent = log;
+                        if (log.includes("[SYSTEM]")) line.className += ' system';
+                        else if (log.includes("Thought")) line.className += ' agent';
+                        terminal.appendChild(line);
+                    });
+                    scrollToBottom(terminal);
+                    
+                    // Update state
+                    updateUIState(msg.agent_running, msg.agent_paused);
+                    
+                    if (msg.current_screenshot) {
+                        viewportImg.src = `data:image/jpeg;base64,${msg.current_screenshot}`;
+                        viewportImg.style.display = 'block';
+                        viewportPlaceholder.style.display = 'none';
+                    }
+                }
+                else if (msg.type === "log") {
+                    let styleClass = "";
+                    if (msg.message.includes("[SYSTEM]")) styleClass = "system";
+                    else if (msg.message.includes("Thought")) styleClass = "agent";
+                    else if (msg.message.includes("Error")) styleClass = "error";
+                    else if (msg.message.includes("[HITL")) styleClass = "user-hitl";
+                    appendLog(msg.message, styleClass);
+                }
+                else if (msg.type === "screenshot") {
+                    viewportImg.src = `data:image/jpeg;base64,${msg.data}`;
+                    viewportImg.style.display = 'block';
+                    viewportPlaceholder.style.display = 'none';
+                }
+                else if (msg.type === "status") {
+                    const running = (msg.status === "running" || msg.status === "paused");
+                    const paused = (msg.status === "paused");
+                    updateUIState(running, paused);
+                }
+                else if (msg.type === "db_update") {
+                    fetchJobs();
+                }
+            };
+
+            socket.onclose = () => {
+                appendLog("[SYSTEM] Connection lost. Reconnecting in 3s...", "error");
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        // Spotlight Mode Controller
+        function setSpotlightActive(active) {
+            isSpotlight = active;
+            const rightColumn = document.getElementById('rightColumn');
+            const spotlightIconMax = document.getElementById('spotlightIconMax');
+            const spotlightIconMin = document.getElementById('spotlightIconMin');
+            const spotlightToggleText = document.getElementById('spotlightToggleText');
+            const spotlightToggleBtn = document.getElementById('spotlightToggleBtn');
+            
+            if (active) {
+                rightColumn.classList.add('spotlight-active');
+                spotlightToggleBtn.classList.add('active');
+                spotlightIconMax.style.display = 'none';
+                spotlightIconMin.style.display = 'inline-block';
+                spotlightToggleText.textContent = 'Minimize';
+            } else {
+                rightColumn.classList.remove('spotlight-active');
+                spotlightToggleBtn.classList.remove('active');
+                spotlightIconMax.style.display = 'inline-block';
+                spotlightIconMin.style.display = 'none';
+                spotlightToggleText.textContent = 'Spotlight';
+            }
+        }
+
+        // Helper to update button states based on agent execution state
+        function updateUIState(running, paused) {
+            startBtn.disabled = running;
+            stopBtn.disabled = !running;
+            
+            pauseBtn.disabled = !running || paused;
+            resumeBtn.disabled = !running || !paused;
+            
+            // Text inputs disabled when agent running
+            keywordsInput.disabled = running;
+            locationInput.disabled = running;
+            llmProviderInput.disabled = running;
+            apiKeyInput.disabled = running;
+            
+            // HITL elements
+            hitlInput.disabled = !paused;
+            hitlSendBtn.disabled = !paused;
+            
+            if (paused) {
+                hitlAlert.style.display = 'flex';
+                statusBadge.className = 'status-badge status-paused';
+                statusText.textContent = 'PAUSED';
+                switchTab('browser');
+                
+                // Auto-maximize on pause / HITL events
+                if (!hasAutoMaximized) {
+                    setSpotlightActive(true);
+                    hasAutoMaximized = true;
+                }
+            } else if (running) {
+                hitlAlert.style.display = 'none';
+                statusBadge.className = 'status-badge status-running';
+                statusText.textContent = 'RUNNING';
+                
+                // Auto-maximize when scraping starts
+                if (!hasAutoMaximized) {
+                    setSpotlightActive(true);
+                    hasAutoMaximized = true;
+                }
+            } else {
+                hitlAlert.style.display = 'none';
+                statusBadge.className = 'status-badge status-idle';
+                statusText.textContent = 'IDLE';
+                viewportImg.style.display = 'none';
+                viewportPlaceholder.style.display = 'flex';
+                
+                // Reset auto-maximize state so that the next run triggers it automatically
+                hasAutoMaximized = false;
+            }
+        }
+
+        function appendLog(message, styleClass) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            if (styleClass) line.className += ' ' + styleClass;
+            line.textContent = message;
+            terminal.appendChild(line);
+            scrollToBottom(terminal);
+        }
+
+        function scrollToBottom(elem) {
+            elem.scrollTop = elem.scrollHeight;
+        }
+
+        // Fetch jobs from DB
+        async function fetchJobs() {
+            try {
+                const res = await fetch("/api/jobs");
+                allJobs = await res.json();
+                renderJobs(allJobs);
+            } catch (err) {
+                console.error("Failed to fetch jobs:", err);
+            }
+        }
+
+        function renderJobs(jobs) {
+            if (jobs.length === 0) {
+                jobsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">No jobs found in the database. Start the scraper to find jobs!</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            jobsTableBody.innerHTML = "";
+            jobs.forEach(job => {
+                const tr = document.createElement('tr');
+                
+                // Determine work mode badge
+                let workModeHtml = `<span class="badge badge-unknown">Not Specified</span>`;
+                if (job.work_mode) {
+                    const mode = job.work_mode.toLowerCase();
+                    if (mode.includes('remote')) {
+                        workModeHtml = `<span class="badge badge-remote">Remote</span>`;
+                    } else if (mode.includes('hybrid')) {
+                        workModeHtml = `<span class="badge badge-hybrid">Hybrid</span>`;
+                    } else if (mode.includes('onsite') || mode.includes('on-site')) {
+                        workModeHtml = `<span class="badge badge-onsite">On-site</span>`;
+                    } else if (job.work_mode !== 'Not Specified') {
+                        workModeHtml = `<span class="badge badge-onsite">${escapeHTML(job.work_mode)}</span>`;
+                    }
+                }
+                
+                tr.innerHTML = `
+                    <td style="font-weight: 500; color: #ffffff;">${escapeHTML(job.title)}</td>
+                    <td>${escapeHTML(job.company)}</td>
+                    <td>${escapeHTML(job.location)}</td>
+                    <td>${workModeHtml}</td>
+                    <td><span style="color: #4ade80;">${escapeHTML(job.salary)}</span></td>
+                    <td>${escapeHTML(job.employment_type)}</td>
+                    <td>${escapeHTML(job.date_posted)}</td>
+                    <td><button class="view-btn" onclick="openJobDetails('${job.job_id}')">Details</button></td>
+                `;
+                jobsTableBody.appendChild(tr);
+            });
+        }
+
+        function escapeHTML(str) {
+            return str ? str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            ) : '';
+        }
+
+        // View Details Modal
+        window.openJobDetails = function(jobId) {
+            const job = allJobs.find(j => j.job_id === jobId);
+            if (!job) return;
+            
+            modalTitle.textContent = job.title;
+            modalSubtitle.textContent = `${job.company} ΓÇö ${job.location}`;
+            modalBody.textContent = job.description;
+            
+            const salaryText = job.salary ? `Salary: ${job.salary}` : "Salary: Not Specified";
+            const empText = job.employment_type ? `Type: ${job.employment_type}` : "Type: Not Specified";
+            const modeText = job.work_mode ? `Mode: ${job.work_mode}` : "Mode: Not Specified";
+            modalMeta.textContent = `${salaryText} | ${empText} | ${modeText} | Scraped: ${new Date(job.scraped_at).toLocaleDateString()}`;
+            
+            modalLink.href = job.url;
+            
+            jobModal.style.display = 'flex';
+            setTimeout(() => {
+                jobModal.style.opacity = '1';
+                jobModal.querySelector('.modal-content').style.transform = 'scale(1)';
+            }, 50);
+        };
+
+        function closeJobModal() {
+            jobModal.style.opacity = '0';
+            jobModal.querySelector('.modal-content').style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                jobModal.style.display = 'none';
+            }, 300);
+        }
+
+        [closeModal, closeModalBtn, jobModal].forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (e.target === el || el === closeModal || el === closeModalBtn) {
+                    closeJobModal();
+                }
+            });
+        });
+
+        // Filter Table
+        tableSearch.addEventListener('input', () => {
+            const q = tableSearch.value.toLowerCase();
+            const filtered = allJobs.filter(j => 
+                j.title.toLowerCase().includes(q) || 
+                j.company.toLowerCase().includes(q) || 
+                j.location.toLowerCase().includes(q)
+            );
+            renderJobs(filtered);
+        });
+
+        // Trigger action controls
+        startBtn.addEventListener('click', () => {
+            const mode = scraperModeInput.value;
+            const key = apiKeyInput.value.trim();
+            
+            if (mode === 'ai' && !key) {
+                alert("Please provide your LLM API Key to start the AI agent.");
+                return;
+            }
+            
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                // Instantly update UI to show starting feedback
+                startBtn.disabled = true;
+                keywordsInput.disabled = true;
+                locationInput.disabled = true;
+                llmProviderInput.disabled = true;
+                apiKeyInput.disabled = true;
+                statusBadge.className = 'status-badge status-running';
+                statusText.textContent = 'STARTING...';
+                
+                socket.send(JSON.stringify({
+                    type: "start",
+                    mode: mode,
+                    keywords: keywordsInput.value,
+                    location: locationInput.value,
+                    llm_provider: llmProviderInput.value,
+                    api_key: key
+                }));
+                appendLog(`[SYSTEM] Initiating ${mode === 'fast' ? 'Fast Playwright' : 'AI Agent'} start...`, "system");
+            }
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                pauseBtn.disabled = true;
+                statusText.textContent = 'PAUSING...';
+                socket.send(JSON.stringify({ type: "pause" }));
+            }
+        });
+
+        resumeBtn.addEventListener('click', () => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                resumeBtn.disabled = true;
+                statusText.textContent = 'RESUMING...';
+                socket.send(JSON.stringify({ type: "resume" }));
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                stopBtn.disabled = true;
+                statusText.textContent = 'STOPPING...';
+                socket.send(JSON.stringify({ type: "stop" }));
+            }
+        });
+
+        // HITL text input sending
+        function sendHITLInput() {
+            const text = hitlInput.value;
+            if (text && socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: "input",
+                    text: text
+                }));
+                hitlInput.value = "";
+            }
+        }
+
+        hitlSendBtn.addEventListener('click', sendHITLInput);
+        hitlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendHITLInput();
+            }
+        });
+
+        // Screenshot mouse interactions (Click forwarding)
+        viewportImg.addEventListener('click', (e) => {
+            // Only click if socket is active
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                const rect = viewportImg.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                
+                socket.send(JSON.stringify({
+                    type: "click",
+                    x: x,
+                    y: y
+                }));
+            }
+        });
+
+        // Keypress listener for inputs to start scraping on Enter
+        [keywordsInput, locationInput, apiKeyInput].forEach(elem => {
+            elem.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startBtn.click();
+                }
+            });
+        });
+
+        // Tab switching logic
+        const tabBtnBrowser = document.getElementById('tabBtnBrowser');
+        const tabBtnLogs = document.getElementById('tabBtnLogs');
+        const tabContentBrowser = document.getElementById('tabContentBrowser');
+        const tabContentLogs = document.getElementById('tabContentLogs');
+
+        function switchTab(tabName) {
+            if (tabName === 'browser') {
+                tabBtnBrowser.classList.add('active');
+                tabBtnLogs.classList.remove('active');
+                tabContentBrowser.classList.add('active');
+                tabContentLogs.classList.remove('active');
+            } else if (tabName === 'logs') {
+                tabBtnLogs.classList.add('active');
+                tabBtnBrowser.classList.remove('active');
+                tabContentLogs.classList.add('active');
+                tabContentBrowser.classList.remove('active');
+            }
+        }
+
+        tabBtnBrowser.addEventListener('click', () => switchTab('browser'));
+        tabBtnLogs.addEventListener('click', () => switchTab('logs'));
+
+        // Spotlight toggle event listener
+        const spotlightToggleBtn = document.getElementById('spotlightToggleBtn');
+        spotlightToggleBtn.addEventListener('click', () => {
+            setSpotlightActive(!isSpotlight);
+        });
+
+        // Close/Minimize Spotlight mode on 'Escape' keypress
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isSpotlight) {
+                setSpotlightActive(false);
+            }
+        });
+
+        // Toggle LLM settings visibility based on Scraper Mode selection
+        const llmDetailsAccordion = document.querySelector('.llm-details-accordion');
+        
+        function updateLLMVisibility() {
+            if (scraperModeInput.value === 'fast') {
+                llmDetailsAccordion.style.display = 'none';
+            } else {
+                llmDetailsAccordion.style.display = 'block';
+            }
+        }
+        
+        scraperModeInput.addEventListener('change', updateLLMVisibility);
+        updateLLMVisibility(); // Run on initial load
+
+        // Connect WebSocket and fetch database records on load
+        connectWebSocket();
+        fetchJobs();
+
+    </script>
+</body>
+</html>

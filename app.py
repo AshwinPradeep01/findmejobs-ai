@@ -14,7 +14,10 @@ import sqlite3
 import datetime
 import base64
 import logging
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+import io
+import fitz  # PyMuPDF
+import docx
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
@@ -966,6 +969,12 @@ class MatchRequest(BaseModel):
     api_key: str
     llm_provider: str = "gemini"
 
+class CustomMatchRequest(BaseModel):
+    api_key: str
+    llm_provider: str = "gemini"
+    cv_text: str
+    jd_text: str
+
 class TailorRequest(BaseModel):
     api_key: str
     llm_provider: str = "gemini"
@@ -1088,6 +1097,76 @@ async def import_profile(req: ImportRequest):
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")
         return {"status": "error", "message": str(e)}
+
+@app.post("/api/parse-cv")
+async def parse_cv_file(file: UploadFile = File(...)):
+    try:
+        content = await file.read()
+        text = ""
+        filename = file.filename.lower()
+        if filename.endswith(".pdf"):
+            doc = fitz.open(stream=content, filetype="pdf")
+            for page in doc:
+                text += page.get_text() + "\n"
+            doc.close()
+        elif filename.endswith(".docx"):
+            doc = docx.Document(io.BytesIO(content))
+            text = "\n".join([para.text for para in doc.paragraphs])
+        else:
+            return {"status": "error", "message": "Unsupported file format. Please upload PDF or DOCX."}
+            
+        return {"status": "success", "text": text.strip()}
+    except Exception as e:
+        logger.error(f"Error parsing CV: {e}")
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/match-cv-custom")
+async def match_cv_custom(req: CustomMatchRequest):
+    try:
+        if req.llm_provider == "gemini":
+            llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=req.api_key)
+        elif req.llm_provider == "openai":
+            llm = ChatOpenAI(model="gpt-4o-mini", api_key=req.api_key)
+        else:
+            return {"status": "error", "message": "Invalid LLM provider"}
+            
+        prompt = (
+            "You are an expert ATS (Applicant Tracking System) and professional recruiter.\n"
+            "Compare the user's CV against the Job Description.\n\n"
+            "--- USER CV ---\n"
+            f"{req.cv_text}\n\n"
+            "--- JOB DESCRIPTION ---\n"
+            f"{req.jd_text}\n\n"
+            "Analyze the suitability of the user for this job.\n"
+            "Calculate a suitability score between 0 and 100 representing how well the candidate matches the job requirements.\n"
+            "Identify matched skills/strengths, missing skills/gaps (requirements in JD not covered/emphasized in user CV), and provide brief specific recommendations/tips.\n\n"
+            "Return ONLY a valid JSON object matching this schema:\n"
+            "{\n"
+            "  \"suitability_score\": 85,\n"
+            "  \"matched_skills\": [\"Python\", \"Docker\"],\n"
+            "  \"missing_skills\": [\"Kubernetes\", \"AWS EKS\"],\n"
+            "  \"tips\": [\n"
+            "    \"Highlight your experience with Kubernetes as it is a major requirement.\",\n"
+            "    \"Mention Docker Swarm or container orchestration in your projects section.\"\n"
+            "  ]\n"
+            "}\n"
+            "Do not include any explanation or markdown formatting (like ```json). Return pure JSON."
+        )
+        
+        response = await llm.ainvoke(prompt)
+        parsed = parse_json_response(response.content)
+        
+        return {
+            "status": "success", 
+            "score": parsed.get("suitability_score", 0),
+            "matched_skills": parsed.get("matched_skills", []),
+            "missing_skills": parsed.get("missing_skills", []),
+            "tips": parsed.get("tips", [])
+        }
+    except Exception as e:
+        logger.error(f"Error in custom match: {e}")
+        return {"status": "error", "message": str(e)}
+
 
 @app.post("/api/jobs/{job_id}/match")
 async def match_job(job_id: str, req: MatchRequest):
