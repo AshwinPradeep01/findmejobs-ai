@@ -17,3 +17,14 @@ cookie.txt
 # Local files
 .env
 .env.*
+
+# Unrelated projects
+customer-support-agent/
+weather-assistant/
+scratch/
+
+# Debug/dev files
+debug_*.py
+my_script.py
+bad_schema.sql
+login_debug.png

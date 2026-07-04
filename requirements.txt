@@ -1,0 +1,34 @@
+# FindMeJobs.ai — Dependencies
+# Core Framework
+fastapi==0.137.1
+uvicorn==0.49.0
+websockets==16.0
+python-multipart==0.0.32
+
+# Browser Automation
+playwright==1.60.0
+browser-use==0.13.1
+
+# LLM Providers
+langchain-core==1.4.7
+langchain-google-genai==4.2.5
+langchain-openai==1.1.9
+openai==2.16.0
+google-genai==1.65.0
+
+# Web Scraping & Parsing
+beautifulsoup4==4.15.0
+lxml==6.1.1
+markdownify==1.2.2
+
+# Document Parsing (CV Upload)
+pymupdf==1.28.0
+python-docx==1.2.0
+pypdf==6.10.2
+
+# Utilities
+python-dotenv==1.2.2
+pydantic==2.12.5
+pillow==12.2.0
+requests==2.33.0
+aiofiles==25.1.0
