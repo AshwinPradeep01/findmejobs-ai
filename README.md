@@ -3,8 +3,47 @@
 FindMeJobs.ai is a state-of-the-art job search scraping dashboard that automates LinkedIn job harvesting while allowing Human-in-the-Loop (HITL) overrides. It integrates both a custom fast async Playwright scraper and a generative LLM-driven browser agent using `browser-use`.
 
 The application features a responsive split-screen vertical glassmorphic UI layout:
-- **Left Panel**: Scraper Controls (keyword/location inputs, LLM setup, runtime action triggers) and a dynamic Scraped Jobs Database view.
+- **Left Panel**: Scraper Controls (keyword/location inputs, LLM setup, runtime action triggers), CV/JD Matcher, and a dynamic Scraped Jobs Database view with quick date filters.
 - **Right Panel**: A real-time viewport displaying live browser screenshots alongside streaming terminal execution logs. Includes a full-screen **Spotlight Mode** that triggers automatically during scraping or when HITL action is required.
+
+---
+
+## ⚡ Quick Start (3 Steps)
+
+> **Prerequisites**: [Python 3.10+](https://www.python.org/downloads/) and [Git](https://git-scm.com/downloads) must be installed.
+
+### Windows
+
+```bash
+git clone <repository-url>
+cd find-me-jobs-ai
+setup.bat           # One-time: creates venv, installs everything (~2 min)
+start.bat           # Launches server + opens browser
+```
+
+### macOS / Linux
+
+```bash
+git clone <repository-url>
+cd find-me-jobs-ai
+chmod +x setup.sh start.sh
+./setup.sh          # One-time: creates venv, installs everything (~2 min)
+./start.sh          # Launches server + opens browser
+```
+
+The dashboard opens at **http://127.0.0.1:8000**
+
+### 🔐 First-Time LinkedIn Login
+
+On first run, you need to log in to LinkedIn through the app:
+
+1. Start the **Fast Playwright Scraper** with your keyword and location.
+2. If the terminal shows `[HITL] LinkedIn session is not logged in`, the viewport will automatically enter **Spotlight Mode**.
+3. Select the **Browser** tab, interact with the screen to enter your LinkedIn credentials and solve any 2FA/security challenges.
+4. Once logged in, click **Resume** on the Scraper Controls.
+5. Your session is saved to `.playwright_data/` and will be loaded automatically on future runs.
+
+> **Note**: Each user must complete their own LinkedIn login. Session data is local and not shared.
 
 ---
 
@@ -25,7 +64,16 @@ The application features a responsive split-screen vertical glassmorphic UI layo
 - **AI Agent Optimization**: Already-scraped Job IDs are dynamically injected into the AI Agent's system prompt, instructing the LLM to skip clicking on those cards entirely.
 - **SQLite & CSV Synchronization**: SQLite acts as the single source of truth. On startup, the `jobs.csv` file is fully rebuilt and de-duplicated. During runtime, new unique jobs are written to SQLite and appended to the CSV.
 
-### 4. Advanced Spotlight Mode
+### 4. CV / Job Description Matcher
+- Upload your CV (PDF, DOCX) or paste text, then compare against any scraped job description.
+- LLM-powered analysis returns a match score, matched skills, missing skills, and actionable improvement tips.
+- Auto-fill CV from your saved profile data.
+
+### 5. Quick Date Filters
+- **Today / Yesterday** pill tags above the jobs table for instant filtering by scrape date.
+- Combined with the advanced Filter & Sort modal for company, location, work mode, salary, and more.
+
+### 6. Advanced Spotlight Mode
 - Maximizes the live browser viewport into a premium full-screen glassmorphic overlay during active scraping runs or when paused for manual intervention.
 - The viewport remains in Spotlight mode after scraping completes, allowing developers to inspect details and close/minimize the screen manually.
 
@@ -36,7 +84,8 @@ The application features a responsive split-screen vertical glassmorphic UI layo
 - **Backend**: FastAPI, WebSockets, Python `asyncio`
 - **Scraper Engine**: Playwright, `browser-use`
 - **Database**: SQLite3, CSV Exporter
-- **Frontend**: Vanilla HTML5, CSS3 (Glassmorphism), JavaScript (WebSocket API, relative coordinate calculators)
+- **LLM Integration**: Google Gemini, OpenAI (via LangChain)
+- **Frontend**: Vanilla HTML5, CSS3 (Glassmorphism), JavaScript (WebSocket API)
 - **Git Branching Policy**: Centralized branching workflow.
   - `main`: Stable release branch.
   - `development`: Main development branch where features are integrated.
@@ -44,14 +93,9 @@ The application features a responsive split-screen vertical glassmorphic UI layo
 
 ---
 
-## 🚀 Getting Started
+## 💻 Manual Installation (Alternative)
 
-### 📋 Prerequisites
-- Python 3.10 or higher
-- Google Gemini API Key (or OpenAI API Key)
-- LinkedIn account logged in (Playwright profile state saves auth session)
-
-### ⚙️ Installation
+If you prefer not to use the setup scripts:
 
 1. **Clone the Repository**:
    ```bash
@@ -71,8 +115,6 @@ The application features a responsive split-screen vertical glassmorphic UI layo
 3. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
-   # Or using uv:
-   uv pip install -r requirements.txt
    ```
 
 4. **Install Playwright Browsers**:
@@ -80,23 +122,12 @@ The application features a responsive split-screen vertical glassmorphic UI layo
    playwright install chromium
    ```
 
----
-
-## 💻 Running the Application
-
-1. **Start the FastAPI Backend**:
+5. **Start the Server**:
    ```bash
    python -m uvicorn app:app --host 127.0.0.1 --port 8000
    ```
 
-2. **Open the Dashboard**:
-   Open your browser and navigate to: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
-3. **Perform Initial Login**:
-   - Start the **Fast Scraper** with your keyword and location.
-   - If the terminal shows `[HITL] LinkedIn session is not logged in`, the viewport will automatically enter **Spotlight Mode**.
-   - Select the **Browser** tab, interact with the screen to enter your credentials, and solve any 2FA/security verification challenges.
-   - Once logged in, click **Resume** on the Scraper Controls. The session state is saved to the local directory `.playwright_data/` and will be loaded automatically on future runs.
+6. **Open the Dashboard**: Navigate to [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ---
 
@@ -108,6 +139,9 @@ find-me-jobs-ai/
 ├── scrape_linkedin.py      # Core scraping logic and utility scripts
 ├── templates/
 │   └── index.html          # Split-panel glassmorphic dashboard UI
+├── requirements.txt        # Python dependencies
+├── setup.bat / setup.sh    # One-click setup scripts
+├── start.bat / start.sh    # One-click launch scripts
 ├── jobs.db                 # SQLite database storage (git-ignored)
 ├── jobs.csv                # Sync CSV file (git-ignored)
 ├── .playwright_data/       # Persistent browser profile state (git-ignored)
