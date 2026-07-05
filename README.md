@@ -8,42 +8,77 @@ The application features a responsive split-screen vertical glassmorphic UI layo
 
 ---
 
-## ⚡ Quick Start (3 Steps)
+## ⚡ Quick Start
 
-> **Prerequisites**: [Python 3.10+](https://www.python.org/downloads/) and [Git](https://git-scm.com/downloads) must be installed.
+> **Prerequisites**: [Python 3.10+](https://www.python.org/downloads/) (check "Add Python to PATH" during install) and [Git](https://git-scm.com/downloads).
 
-### Windows
+### Option A: One-Click Scripts
 
-```bash
+**Windows:**
+```
 git clone <repository-url>
 cd find-me-jobs-ai
-setup.bat           # One-time: creates venv, installs everything (~2 min)
-start.bat           # Launches server + opens browser
+setup.bat           # One-time: creates venv, installs everything (~2-3 min)
+start.bat           # Launches server + opens browser automatically
 ```
 
-### macOS / Linux
-
+**macOS / Linux:**
 ```bash
 git clone <repository-url>
 cd find-me-jobs-ai
 chmod +x setup.sh start.sh
-./setup.sh          # One-time: creates venv, installs everything (~2 min)
-./start.sh          # Launches server + opens browser
+./setup.sh          # One-time: creates venv, installs everything (~2-3 min)
+./start.sh          # Launches server + opens browser automatically
 ```
 
-The dashboard opens at **http://127.0.0.1:8000**
+### Option B: Manual Step-by-Step (PowerShell / CMD)
 
-### 🔐 First-Time LinkedIn Login
+Open **PowerShell** or **Command Prompt** in the project folder:
 
-On first run, you need to log in to LinkedIn through the app:
+**Step 1 — Create Virtual Environment & Install Dependencies:**
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
 
-1. Start the **Fast Playwright Scraper** with your keyword and location.
-2. If the terminal shows `[HITL] LinkedIn session is not logged in`, the viewport will automatically enter **Spotlight Mode**.
-3. Select the **Browser** tab, interact with the screen to enter your LinkedIn credentials and solve any 2FA/security challenges.
+# Install all required Python packages:
+pip install -r requirements.txt
+
+# Install the Playwright Chromium browser binary:
+playwright install chromium
+```
+
+**Step 2 — Initial LinkedIn Login (One-Time Authentication):**
+```powershell
+.\.venv\Scripts\python.exe scrape_linkedin.py
+```
+> A Chrome browser window will open. Log in manually with your LinkedIn credentials, complete any security/2FA checks, and once you see your LinkedIn feed, go back to the terminal and press **Enter**. The script will cache your session and close automatically.
+
+**Step 3 — Start the Web Dashboard:**
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
+```
+Open your browser and go to: **http://127.0.0.1:8000**
+
+---
+
+## 🔐 LinkedIn Login — How It Works
+
+The scraper requires a logged-in LinkedIn session. There are **two ways** to authenticate:
+
+### Method 1: Pre-Login via Script (Recommended for First Setup)
+Run `scrape_linkedin.py` directly — it opens a headed Chrome browser where you log in manually. Your session cookies are saved to `.playwright_data/` and reused automatically on all future runs.
+
+```powershell
+.\.venv\Scripts\python.exe scrape_linkedin.py
+```
+
+### Method 2: Login via Dashboard HITL (During Scraping)
+1. Start the dashboard and click **Start Scraping**.
+2. If the terminal shows `[HITL] LinkedIn session is not logged in`, the viewport enters **Spotlight Mode**.
+3. Click the **Browser** tab, interact with the viewport to enter your credentials and solve any 2FA challenges.
 4. Once logged in, click **Resume** on the Scraper Controls.
-5. Your session is saved to `.playwright_data/` and will be loaded automatically on future runs.
 
-> **Note**: Each user must complete their own LinkedIn login. Session data is local and not shared.
+> **Note**: Each user must complete their own LinkedIn login. Session data (`.playwright_data/`) is local and must not be shared.
 
 ---
 
@@ -93,44 +128,6 @@ On first run, you need to log in to LinkedIn through the app:
 
 ---
 
-## 💻 Manual Installation (Alternative)
-
-If you prefer not to use the setup scripts:
-
-1. **Clone the Repository**:
-   ```bash
-   git clone <repository-url>
-   cd find-me-jobs-ai
-   ```
-
-2. **Set Up Python Virtual Environment**:
-   ```bash
-   python -m venv .venv
-   # Windows:
-   .venv\Scripts\activate
-   # macOS/Linux:
-   source .venv/bin/activate
-   ```
-
-3. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Install Playwright Browsers**:
-   ```bash
-   playwright install chromium
-   ```
-
-5. **Start the Server**:
-   ```bash
-   python -m uvicorn app:app --host 127.0.0.1 --port 8000
-   ```
-
-6. **Open the Dashboard**: Navigate to [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
----
-
 ## 📂 Project Directory Structure
 
 ```
@@ -170,3 +167,4 @@ Contributions are welcome! Please follow these guidelines:
    git merge feature/your-feature-name
    ```
 4. Never commit directly to `main`. `development` will be merged into `main` only for production releases.
+
