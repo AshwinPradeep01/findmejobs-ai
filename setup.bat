@@ -36,7 +36,7 @@ if errorlevel 1 (
 )
 
 echo  [4/4] Installing Playwright Chromium browser...
-playwright install chromium
+python -m playwright install chromium
 if errorlevel 1 (
     echo  [ERROR] Failed to install Playwright browsers.
     pause
