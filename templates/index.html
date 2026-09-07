@@ -82,34 +82,46 @@
             height: calc(100vh - 40px);
         }
 
-        /* Header */
+        /* Header with Integrated Controls */
         header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px 25px;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 6px 16px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 100;
+            min-height: 52px;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             flex-shrink: 0;
         }
 
         header h1 {
             font-family: var(--font-outfit);
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             font-weight: 800;
             background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            white-space: nowrap;
         }
 
         header h1 span {
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.72rem;
+            font-weight: 600;
             color: var(--primary);
             border: 1px solid rgba(99, 102, 241, 0.3);
-            padding: 2px 8px;
-            border-radius: 20px;
+            padding: 1px 6px;
+            border-radius: 12px;
             background: rgba(99, 102, 241, 0.1);
             letter-spacing: 0.5px;
             font-family: var(--font-inter);
@@ -120,11 +132,12 @@
             align-items: center;
             gap: 8px;
             font-weight: 600;
-            font-size: 0.9rem;
-            padding: 6px 14px;
+            font-size: 0.85rem;
+            padding: 5px 12px;
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .status-dot {
@@ -181,7 +194,7 @@
         /* Static Sidebar Layout */
         .collapsible-sidebar {
             position: fixed;
-            top: 95px; /* Below header */
+            top: 75px; /* Below header */
             left: 0;
             bottom: 20px;
             width: 55px; /* Just enough for tabs */
@@ -446,36 +459,106 @@
             min-height: 0;
         }
 
-        /* Sidebar Control Panel */
-        .controls-panel {
-            padding: 12px;
+        /* Header Integrated Scraper Controls Toolbar */
+        .header-controls-toolbar {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex-shrink: 0;
+            align-items: center;
+            gap: 7px;
+            flex: 1;
+            max-width: 960px;
+            justify-content: center;
+            position: relative;
         }
 
-        .controls-layout {
+        .controls-toolbar {
             display: flex;
-            gap: 15px;
+            align-items: center;
+            gap: 7px;
+            width: 100%;
             min-height: 0;
         }
 
-        .controls-left-col {
-            flex: 1.1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            min-width: 0;
+        .controls-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.12);
+            margin: 0 2px;
+            flex-shrink: 0;
         }
 
-        .controls-right-col {
-            flex: 0.9;
+        .toolbar-select {
+            padding: 5px 8px;
+            font-size: 0.82rem;
+            min-width: 145px;
+            height: 34px;
+        }
+
+        .toolbar-input {
+            padding: 5px 10px;
+            font-size: 0.82rem;
+            height: 34px;
+        }
+
+        .btn-compact {
+            padding: 5px 11px;
+            font-size: 0.8rem;
+            height: 34px;
+            white-space: nowrap;
+        }
+
+        .btn-icon-setting {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-icon-setting:hover, .btn-icon-setting.active {
+            background: rgba(89, 101, 243, 0.2);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+
+        /* LLM Settings Popover */
+        .llm-popover {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 310px;
+            padding: 16px;
+            z-index: 300;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            gap: 8px;
-            min-width: 0;
+            gap: 12px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(89, 101, 243, 0.35);
+            background: rgba(14, 17, 30, 0.96);
+        }
+
+        .llm-popover.hidden {
+            display: none;
+        }
+
+        .llm-popover-title {
+            font-family: var(--font-outfit);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .panel-title {
@@ -1263,10 +1346,77 @@
 
     <div class="app-container">
         
-        <!-- Top bar Header -->
+        <!-- Top bar Header with Integrated Scraper Controls -->
         <header class="glass-card">
-            <h1>FindMeJobs.ai <span>HEADLESS AGENT</span></h1>
-            
+            <div class="brand-group">
+                <h1>FindMeJobs.ai <span>AGENT</span></h1>
+            </div>
+
+            <!-- Integrated Horizontal Scraper Controls Toolbar in Header -->
+            <div class="header-controls-toolbar">
+                <!-- Mode Select -->
+                <div style="display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
+                    <span style="font-size: 0.95rem; color: #f59e0b;" title="Scraper Mode">⚡</span>
+                    <select id="scraperMode" class="toolbar-select" title="Select Scraper Mode">
+                        <option value="fast" selected>Fast Playwright (Free)</option>
+                        <option value="ai">AI Agent (Requires Key)</option>
+                    </select>
+                </div>
+
+                <div class="controls-divider"></div>
+
+                <!-- Keywords Input -->
+                <input type="text" id="keywords" class="toolbar-input" value="Software Engineer" placeholder="Keywords (e.g. Data Engineer)" style="flex: 1.1; min-width: 130px;" title="Job Keywords">
+
+                <!-- Location Input -->
+                <input type="text" id="location" class="toolbar-input" value="United States" placeholder="Location (e.g. Kochi, Remote)" style="flex: 0.85; min-width: 105px;" title="Location">
+
+                <div class="controls-divider"></div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
+                    <button class="btn btn-start btn-compact" id="startBtn" title="Start Scraping">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Start
+                    </button>
+                    <button class="btn btn-pause btn-compact" id="pauseBtn" disabled title="Pause Execution">Pause</button>
+                    <button class="btn btn-resume btn-compact" id="resumeBtn" disabled title="Resume Execution">Resume</button>
+                    <button class="btn btn-stop btn-compact" id="stopBtn" disabled title="Stop Scraper">Stop</button>
+                </div>
+
+                <div class="controls-divider"></div>
+
+                <!-- LLM Settings Button -->
+                <button type="button" class="btn-icon-setting" id="llmSettingsBtn" title="Advanced LLM Settings">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+
+                <!-- LLM Popover Dropdown -->
+                <div class="glass-card llm-popover hidden" id="llmPopover">
+                    <div class="llm-popover-title">
+                        <span>ADVANCED LLM SETTINGS</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); cursor: pointer;" id="closeLlmPopoverBtn">✕</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="llmProvider">LLM Provider</label>
+                        <select id="llmProvider">
+                            <option value="gemini">Gemini 2.5 Flash</option>
+                            <option value="openai">OpenAI GPT-4o-mini</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKey">LLM API Key</label>
+                        <div class="api-key-container">
+                            <input type="password" id="apiKey" placeholder="Enter API Key">
+                            <button class="api-key-toggle" id="apiKeyToggle" type="button">SHOW</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="statusBadge" class="status-badge status-idle">
                 <span class="status-dot"></span>
                 <span id="statusText">IDLE</span>
@@ -1303,81 +1453,11 @@
     <!-- Main Workspace Area -->
     <div class="workspace" id="mainModuleScraper">
         
-        <!-- Left Column: Controls & Jobs Table -->
+        <!-- Left Column: Full-Height Scraped Jobs Database -->
         <div class="left-column">
             
-            <!-- Controls Panel -->
-            <div class="glass-card controls-panel">
-                <div class="panel-title">Scraper Controls</div>
-                
-                <div class="controls-layout">
-                    <!-- Left Side: Inputs and Settings -->
-                    <div class="controls-left-col">
-                        <div class="form-group">
-                            <label for="scraperMode">Scraper Mode</label>
-                            <select id="scraperMode">
-                                <option value="fast" selected>Fast Playwright (Free)</option>
-                                <option value="ai">AI Agent (Requires Key)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="keywords">Job Keywords</label>
-                            <input type="text" id="keywords" value="Software Engineer" placeholder="e.g. Software Engineer">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="location">Location</label>
-                            <input type="text" id="location" value="United States" placeholder="e.g. United States">
-                        </div>
-
-                        <!-- Collapsible LLM Settings -->
-                        <details class="llm-details-accordion" style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
-                            <summary style="cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
-                                <span>ADVANCED LLM SETTINGS</span>
-                                <span style="font-size: 0.7rem; font-weight: normal; color: var(--primary);">TOGGLE</span>
-                            </summary>
-                            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
-                                <div class="form-group">
-                                    <label for="llmProvider">LLM Provider</label>
-                                    <select id="llmProvider">
-                                        <option value="gemini">Gemini 2.5 Flash</option>
-                                        <option value="openai">OpenAI GPT-4o-mini</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="apiKey">LLM API Key</label>
-                                    <div class="api-key-container">
-                                        <input type="password" id="apiKey" placeholder="Enter API Key">
-                                        <button class="api-key-toggle" id="apiKeyToggle" type="button">SHOW</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-
-                    <!-- Right Side: Action Buttons -->
-                    <div class="controls-right-col">
-                        <label style="margin-bottom: 2px;">Execution Actions</label>
-                        
-                        <button class="btn btn-start" id="startBtn" style="width: 100%;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                            Start Scraping
-                        </button>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <button class="btn btn-pause" id="pauseBtn" disabled>Pause</button>
-                            <button class="btn btn-resume" id="resumeBtn" disabled>Resume</button>
-                        </div>
-                        
-                        <button class="btn btn-stop" id="stopBtn" style="width: 100%;" disabled>Stop Scraper</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom Panel: Scraped Jobs Database -->
-            <div class="glass-card jobs-section" style="flex: 1.2; min-height: 0; display: flex; flex-direction: column;">
+            <!-- Panel: Scraped Jobs Database (Full Height) -->
+            <div class="glass-card jobs-section" style="flex: 1; height: 100%; min-height: 0; display: flex; flex-direction: column;">
                 <div class="jobs-header" style="flex-shrink: 0;">
                     <div class="panel-title" style="margin: 0; border: none; padding: 0;">Scraped Jobs Database</div>
                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -1889,6 +1969,7 @@
         let isSpotlight = false;
         let hasAutoMaximized = false;
         let activeQuickFilter = 'all'; // 'all', 'today', 'yesterday'
+        let activeJobForMatch = null; // Tracks the job currently open in the Details modal
 
         // Advanced Filter & Sort variables
         let activeFilters = {
@@ -1927,6 +2008,9 @@
         const llmProviderInput = document.getElementById('llmProvider');
         const apiKeyInput = document.getElementById('apiKey');
         const apiKeyToggle = document.getElementById('apiKeyToggle');
+        const llmSettingsBtn = document.getElementById('llmSettingsBtn');
+        const llmPopover = document.getElementById('llmPopover');
+        const closeLlmPopoverBtn = document.getElementById('closeLlmPopoverBtn');
 
         
         const viewportImg = document.getElementById('viewportImg');
@@ -1972,7 +2056,10 @@
 
         // Save inputs on change
         scraperModeInput.addEventListener('change', () => {
-            updateLLMVisibility();
+            if (scraperModeInput.value === 'ai') {
+                llmPopover.classList.remove('hidden');
+                llmSettingsBtn.classList.add('active');
+            }
         });
         
         keywordsInput.addEventListener('change', () => {
@@ -1987,6 +2074,34 @@
         apiKeyInput.addEventListener('change', () => {
             localStorage.setItem('linkedin_key', apiKeyInput.value);
         });
+
+        // LLM Popover toggle handlers
+        if (llmSettingsBtn && llmPopover) {
+            llmSettingsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                llmPopover.classList.toggle('hidden');
+                llmSettingsBtn.classList.toggle('active', !llmPopover.classList.contains('hidden'));
+            });
+
+            if (closeLlmPopoverBtn) {
+                closeLlmPopoverBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    llmPopover.classList.add('hidden');
+                    llmSettingsBtn.classList.remove('active');
+                });
+            }
+
+            llmPopover.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            document.addEventListener('click', () => {
+                if (!llmPopover.classList.contains('hidden')) {
+                    llmPopover.classList.add('hidden');
+                    llmSettingsBtn.classList.remove('active');
+                }
+            });
+        }
 
         // Password visibility toggle helper
         function toggleApiKeyVisibility(inputEl, btnEl) {
@@ -2623,8 +2738,6 @@
                 sidebarRunMatchBtn.disabled = false;
             }
             
-            // Automatically switch left sidebar tab to CV Matcher so the user can see match results
-            switchSidebarTab('cvmatcher');
         };
 
         function closeJobModal() {
@@ -3106,18 +3219,8 @@
         });
 
         // Toggle LLM settings visibility based on Scraper Mode selection
-        const llmDetailsAccordion = document.querySelector('.llm-details-accordion');
-        
-        function updateLLMVisibility() {
-            if (scraperModeInput.value === 'fast') {
-                llmDetailsAccordion.style.display = 'none';
-            } else {
-                llmDetailsAccordion.style.display = 'block';
-            }
-        }
-        
-        scraperModeInput.addEventListener('change', updateLLMVisibility);
-        updateLLMVisibility(); // Run on initial load
+        // The llmPopover is shown/hidden when scraper mode changes to 'ai'
+        // (No accordion element exists; popover toggling is already handled above)
 
         // ==========================================
         // MAIN SCREEN CV MATCHER LOGIC
@@ -3164,24 +3267,34 @@
         });
 
         // Load CV from Profile
+        // /api/profile returns: { experience: [...], projects: [...], skills: [...], education: [...], certifications: [...] }
         btnLoadProfileCV.addEventListener('click', async () => {
             try {
                 btnLoadProfileCV.textContent = "Loading...";
                 const res = await fetch('/api/profile');
                 const data = await res.json();
-                if (data.status === 'success') {
-                    let text = "";
-                    data.profile.forEach(p => {
-                        text += `[${p.section.toUpperCase()}] ${p.title} | ${p.subtitle} (${p.date_range})\nDescription: ${p.description}\n\n`;
+                // data is directly the profile dict (no .status/.profile wrapper)
+                const sections = ['experience', 'projects', 'skills', 'education', 'certifications'];
+                let text = "";
+                sections.forEach(sec => {
+                    const items = data[sec] || [];
+                    items.forEach(p => {
+                        text += `[${sec.toUpperCase()}] ${p.title || ''}`;
+                        if (p.subtitle) text += ` | ${p.subtitle}`;
+                        if (p.date_range) text += ` (${p.date_range})`;
+                        text += '\n';
+                        if (p.description) text += `${p.description}\n`;
+                        text += '\n';
                     });
-                    if (text.trim() === "") {
-                        alert("Your profile is empty! Please add items in the My Profile tab first.");
-                    } else {
-                        cvRawText.value = text;
-                    }
+                });
+                if (text.trim() === "") {
+                    alert("Your profile is empty! Please add items in the My Profile tab first.");
+                } else {
+                    cvRawText.value = text;
                 }
             } catch (err) {
                 console.error(err);
+                alert("Failed to load profile. Please check the server.");
             } finally {
                 btnLoadProfileCV.textContent = "Auto-fill from My Profile";
             }
@@ -3243,8 +3356,8 @@
                         mainMatchStatusLabel.style.color = "var(--danger)";
                     }
 
-                    mainMatchedSkillsList.innerHTML = data.matched_skills.map(s => `<span class="skill-tag matched">${s}</span>`).join('');
-                    mainMissingSkillsList.innerHTML = data.missing_skills.map(s => `<span class="skill-tag missing">${s}</span>`).join('');
+                    mainMatchedSkillsList.innerHTML = data.matched_skills.map(s => `<span class="skill-tag">${s}</span>`).join('');
+                    mainMissingSkillsList.innerHTML = data.missing_skills.map(s => `<span class="missing-skill-tag">${s}</span>`).join('');
                     mainMatchTipsList.innerHTML = data.tips.map(t => `<li style="margin-bottom:4px;">${t}</li>`).join('');
                     
                     mainCvMatchResults.style.display = 'flex';
