@@ -16,6 +16,10 @@
 
 [Features](#-features) · [Architecture](#-system-architecture) · [Quick Start](#-quick-start) · [How It Works](#-how-it-works) · [Tech Stack](#-tech-stack)
 
+<br/><br/>
+
+<img src="./image.png" alt="FindMeJobs.ai Autonomous Agent Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);" />
+
 </div>
 
 ---

@@ -749,30 +749,113 @@
             opacity: 0.5;
         }
 
-        /* Interactive overlay for Pause state */
+        /* ── HITL Strip (in-flow, above viewport, never overlaps it) ── */
         .hitl-alert-overlay {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(245, 158, 11, 0.9);
-            color: #000000;
-            font-weight: 600;
-            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.45);
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-            z-index: 10;
+            padding: 7px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--warning);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .hitl-pulse-dot {
+            width: 8px;
+            height: 8px;
+            min-width: 8px;
+            border-radius: 50%;
+            background-color: var(--warning);
+            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            animation: dotPulsing 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
+            display: inline-block;
+        }
+
+        @keyframes dotPulsing {
+            0%   { box-shadow: 0 0 0 0   rgba(245, 158, 11, 0.7); }
+            70%  { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0);   }
+            100% { box-shadow: 0 0 0 0   rgba(245, 158, 11, 0);   }
+        }
+
+        .hitl-strip-title {
+            font-weight: 700;
+            white-space: nowrap;
+            color: var(--warning);
+        }
+
+        .hitl-strip-sep {
+            width: 1px;
+            height: 14px;
+            background: rgba(245, 158, 11, 0.35);
+            flex-shrink: 0;
+        }
+
+        .hitl-strip-reason {
+            flex: 1;
+            color: rgba(245, 200, 100, 0.95);
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.81rem;
+        }
+
+        .hitl-strip-steps {
             display: flex;
             align-items: center;
             gap: 8px;
-            backdrop-filter: blur(4px);
-            font-size: 0.85rem;
-            animation: bounce 2s infinite;
+            flex-shrink: 0;
+            font-size: 0.76rem;
+            font-weight: 500;
+            color: rgba(245, 158, 11, 0.8);
+            white-space: nowrap;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translate(-50%, 0); }
-            50% { transform: translate(-50%, -6px); }
+        .hitl-step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+
+        /* HITL Input panel — shown below viewport, prominent when paused */
+        .hitl-input-panel {
+            flex-shrink: 0;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: rgba(245, 158, 11, 0.07);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+
+        .hitl-input-panel.active {
+            display: flex;
+        }
+
+        .hitl-input-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hitl-input-hint {
+            font-size: 0.72rem;
+            color: rgba(245, 158, 11, 0.65);
+            font-style: italic;
         }
 
         /* Keyboard input field below viewport */
@@ -1558,13 +1641,22 @@
                     <div class="main-content-area" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
                         
                         <!-- Tab Content: Browser Viewport -->
-                        <div class="tab-content active" id="tabContentBrowser" style="gap: 12px;">
+                        <div class="tab-content active" id="tabContentBrowser" style="gap: 8px;">
+
+                            <!-- HITL Slim Strip (in-flow, doesn't cover viewport) -->
+                            <div id="hitlAlert" class="hitl-alert-overlay" style="display: none;">
+                                <span class="hitl-pulse-dot"></span>
+                                <span class="hitl-strip-title">⚠ Agent Paused</span>
+                                <span class="hitl-strip-sep"></span>
+                                <span class="hitl-strip-reason" id="hitlReasonText">The agent has encountered a step it cannot complete automatically.</span>
+                                <span class="hitl-strip-steps">
+                                    <span class="hitl-step-badge">① Look at screen</span>
+                                    <span class="hitl-step-badge">② Act or type below</span>
+                                    <span class="hitl-step-badge">③ Resume</span>
+                                </span>
+                            </div>
+
                             <div class="browser-viewport-container">
-                                <div id="hitlAlert" class="hitl-alert-overlay" style="display: none;">
-                                    <span class="status-dot" style="background-color: var(--warning); display: inline-block;"></span>
-                                    HUMAN IN THE LOOP - WAITING FOR INPUT
-                                </div>
-                                
                                 <img id="viewportImg" class="browser-viewport" style="display: none;" alt="Live Browser Viewport">
                                 
                                 <div id="viewportPlaceholder" class="viewport-placeholder">
@@ -1576,11 +1668,17 @@
                                     <p>Agent is not running.<br>Configure settings and click "Start Scraping" to view execution.</p>
                                 </div>
                             </div>
-                            
-                            <!-- HITL Keyboard Input bar -->
-                            <div class="hitl-input-bar" style="flex-shrink: 0;">
-                                <input type="text" id="hitlInput" style="flex: 1;" placeholder="Type text to send to browser focus (e.g. solve captcha, credentials)" disabled>
-                                <button class="btn btn-start" id="hitlSendBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;" disabled>Send Text</button>
+
+                            <!-- HITL Input Panel (shown only when paused) -->
+                            <div id="hitlInputPanel" class="hitl-input-panel">
+                                <div class="hitl-input-label">
+                                    <span>📩 What to type:</span>
+                                    <span class="hitl-input-hint" id="hitlInputHint">Type any text the browser needs — e.g. a username, password, CAPTCHA answer, or confirmation.</span>
+                                </div>
+                                <div class="hitl-input-bar">
+                                    <input type="text" id="hitlInput" style="flex: 1;" placeholder="e.g. your username, CAPTCHA answer, search query…" disabled>
+                                    <button class="btn btn-start" id="hitlSendBtn" style="padding: 8px 16px; margin: 0; font-size: 0.85rem;" disabled>Send Text</button>
+                                </div>
                             </div>
                         </div>
 
@@ -1967,9 +2065,9 @@
         let socket = null;
         let allJobs = [];
         let isSpotlight = false;
-        let hasAutoMaximized = false;
         let activeQuickFilter = 'all'; // 'all', 'today', 'yesterday'
         let activeJobForMatch = null; // Tracks the job currently open in the Details modal
+        let hitlReason = "The agent has encountered a step it cannot complete automatically.";
 
         // Advanced Filter & Sort variables
         let activeFilters = {
@@ -2145,6 +2243,9 @@
                     scrollToBottom(terminal);
                     
                     // Update state
+                    if (msg.agent_paused) {
+                        setHITLReason(msg.reason);
+                    }
                     updateUIState(msg.agent_running, msg.agent_paused);
                     
                     if (msg.current_screenshot) {
@@ -2169,6 +2270,9 @@
                 else if (msg.type === "status") {
                     const running = (msg.status === "running" || msg.status === "paused");
                     const paused = (msg.status === "paused");
+                    if (paused) {
+                        setHITLReason(msg.reason);
+                    }
                     updateUIState(running, paused);
                 }
                 else if (msg.type === "db_update") {
@@ -2180,6 +2284,20 @@
                 appendLog("[SYSTEM] Connection lost. Reconnecting in 3s...", "error");
                 setTimeout(connectWebSocket, 3000);
             };
+        }
+
+        // HITL Reason subtitle helper
+        function setHITLReason(reason) {
+            hitlReason = reason || "The agent has encountered a step it cannot complete automatically.";
+            const reasonElem = document.getElementById('hitlReasonText');
+            if (reasonElem) reasonElem.textContent = hitlReason;
+            // Also update the input panel hint to reflect the specific reason
+            const hintElem = document.getElementById('hitlInputHint');
+            if (hintElem) {
+                hintElem.textContent = reason
+                    ? `Agent needs: ${reason}`
+                    : 'Type any text the browser needs — e.g. a username, password, CAPTCHA answer, or confirmation.';
+            }
         }
 
         // Spotlight Mode Controller
@@ -2228,37 +2346,29 @@
             // HITL elements
             hitlInput.disabled = !paused;
             hitlSendBtn.disabled = !paused;
+            const hitlInputPanel = document.getElementById('hitlInputPanel');
             
             if (paused) {
                 hitlAlert.style.display = 'flex';
+                if (hitlInputPanel) hitlInputPanel.classList.add('active');
                 statusBadge.className = 'status-badge status-paused';
                 statusText.textContent = 'PAUSED';
+                resumeBtn.style.boxShadow = '0 0 14px rgba(245,158,11,0.6)';
                 switchTab('browser');
-                
-                // Auto-maximize on pause / HITL events
-                if (!hasAutoMaximized) {
-                    setSpotlightActive(true);
-                    hasAutoMaximized = true;
-                }
             } else if (running) {
                 hitlAlert.style.display = 'none';
+                if (hitlInputPanel) hitlInputPanel.classList.remove('active');
                 statusBadge.className = 'status-badge status-running';
                 statusText.textContent = 'RUNNING';
-                
-                // Auto-maximize when scraping starts
-                if (!hasAutoMaximized) {
-                    setSpotlightActive(true);
-                    hasAutoMaximized = true;
-                }
+                resumeBtn.style.boxShadow = '';
             } else {
                 hitlAlert.style.display = 'none';
+                if (hitlInputPanel) hitlInputPanel.classList.remove('active');
                 statusBadge.className = 'status-badge status-idle';
                 statusText.textContent = 'IDLE';
+                resumeBtn.style.boxShadow = '';
                 viewportImg.style.display = 'none';
                 viewportPlaceholder.style.display = 'flex';
-                
-                // Reset auto-maximize state so that the next run triggers it automatically
-                hasAutoMaximized = false;
             }
         }
 
